@@ -42,7 +42,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.budiyev.rssreader.R;
@@ -57,7 +56,6 @@ import java.util.Objects;
 public class SettingsActivity extends AppCompatActivity {
     private String mRssFeedAddress;
     private EditText mRssFeedAddressEditor;
-    private LinearLayout mUpdateIntervalLayout;
     private TextView mUpdateIntervalText;
     private AlertDialog mUpdateIntervalDialog;
     private int mWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
@@ -120,7 +118,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(url)) {
             mRssFeedAddressEditor.setText(url);
         }
-        mUpdateIntervalLayout = (LinearLayout) findViewById(R.id.update_interval_layout);
         mUpdateIntervalText = (TextView) findViewById(R.id.update_interval_text);
         setUpdateInterval(PreferencesHelper.getUpdateInterval(this, widgetId));
         mUpdateIntervalDialog = new AlertDialog.Builder(this)
@@ -131,7 +128,7 @@ public class SettingsActivity extends AppCompatActivity {
                         mUpdateIntervalDialog.dismiss();
                     }
                 }).create();
-        mUpdateIntervalLayout.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.update_interval_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mUpdateIntervalDialog.show();
