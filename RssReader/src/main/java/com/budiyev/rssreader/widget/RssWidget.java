@@ -39,7 +39,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Html;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -49,6 +48,7 @@ import com.budiyev.rssreader.helper.CollectionsHelper;
 import com.budiyev.rssreader.helper.ConnectivityHelper;
 import com.budiyev.rssreader.helper.PreferencesHelper;
 import com.budiyev.rssreader.helper.ReaderHelper;
+import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
 import com.budiyev.rssreader.helper.WakeLockHelper;
 import com.budiyev.rssreader.model.Feed;
@@ -59,7 +59,11 @@ import java.util.List;
 public class RssWidget extends AppWidgetProvider {
     public static final String ACTION_UPDATE_WIDGET =
             "com.yotatest.budiyev.rssreader.widget.ACTION_UPDATE_WIDGET";
+    public static final String ACTION_SETTINGS_CHANGED =
+            "com.yotatest.budiyev.rssreader.widget.ACTION_SETTINGS_CHANGED";
     public static final String EXTRA_USE_WAKE_LOCK = "use_wake_lock";
+    public static final String EXTRA_URL_CHANGED = "url_changed";
+    public static final String EXTRA_UPDATE_INTERVAL_CHANGED = "update_interval_changed";
     private static final String WAKE_LOCK_TAG = "RssWidget";
     private static final String ACTION_UPDATE_DATA =
             "com.yotatest.budiyev.rssreader.widget.ACTION_UPDATE_DATA";
@@ -81,19 +85,30 @@ public class RssWidget extends AppWidgetProvider {
         }
         String action = intent.getAction();
         int widgetId = getWidgetId(intent);
-        if (ACTION_UPDATE_DATA.equals(action)) {
-            for (int id : getAppwidgetIds(context)) {
-                ReaderHelper.updateFeed(context, id, true);
+        if (ACTION_SETTINGS_CHANGED.equals(action)) {
+            boolean interval = intent.getBooleanExtra(EXTRA_UPDATE_INTERVAL_CHANGED, false);
+            if (interval) {
+                cancelUpdateDataAlarm(context, widgetId);
             }
-            setUpdateDataAlarm(context);
+            if (intent.getBooleanExtra(EXTRA_URL_CHANGED, false)) {
+                ReaderHelper.updateFeed(context, widgetId);
+            }
+            if (interval) {
+                setUpdateDataAlarm(context, widgetId);
+            }
+        } else if (ACTION_UPDATE_DATA.equals(action)) {
+            ReaderHelper.updateFeed(context, widgetId, true);
+            setUpdateDataAlarm(context, widgetId);
         } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
-            cancelUpdateDataAlarm(context);
             int[] appwidgetIds = getAppwidgetIds(context);
+            for (int id : appwidgetIds) {
+                cancelUpdateDataAlarm(context, id);
+            }
             if (ConnectivityHelper.isConnectedToNetwork(context)) {
                 for (int id : appwidgetIds) {
                     ReaderHelper.updateFeed(context, id, true);
+                    setUpdateDataAlarm(context, id);
                 }
-                setUpdateDataAlarm(context);
             } else {
                 AppWidgetManager instance = AppWidgetManager.getInstance(context);
                 for (int id : appwidgetIds) {
@@ -146,17 +161,8 @@ public class RssWidget extends AppWidgetProvider {
             PreferencesHelper.removeFeed(context, widgetId);
             PreferencesHelper.removeGuid(context, widgetId);
             PreferencesHelper.removePosition(context, widgetId);
+            PreferencesHelper.removeUpdateInterval(context, widgetId);
         }
-    }
-
-    @Override
-    public void onEnabled(Context context) {
-        setUpdateDataAlarm(context);
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        cancelUpdateDataAlarm(context);
     }
 
     @Override
@@ -174,10 +180,13 @@ public class RssWidget extends AppWidgetProvider {
                     .setGuid(context, newWidgetId, PreferencesHelper.getGuid(context, oldWidgetId));
             PreferencesHelper.setPosition(context, newWidgetId,
                     PreferencesHelper.getPosition(context, oldWidgetId));
+            PreferencesHelper.setUpdateInterval(context, newWidgetId,
+                    PreferencesHelper.getUpdateInterval(context, oldWidgetId));
             PreferencesHelper.removeUrl(context, oldWidgetId);
             PreferencesHelper.removeFeed(context, oldWidgetId);
             PreferencesHelper.removeGuid(context, oldWidgetId);
             PreferencesHelper.removePosition(context, oldWidgetId);
+            PreferencesHelper.removeUpdateInterval(context, oldWidgetId);
         }
     }
 
@@ -319,14 +328,15 @@ public class RssWidget extends AppWidgetProvider {
         }
     }
 
-    private static void setUpdateDataAlarm(@NonNull Context context) {
+    private static void setUpdateDataAlarm(@NonNull Context context, int widgetId) {
         getAlarmManager(context).set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + DateUtils.MINUTE_IN_MILLIS,
-                getUpdateDataPendingIntent(context));
+                SystemClock.elapsedRealtime() + UpdateIntervalHelper.INTERVALS[PreferencesHelper
+                        .getUpdateInterval(context, widgetId)],
+                getUpdateDataPendingIntent(context, widgetId));
     }
 
-    private static void cancelUpdateDataAlarm(@NonNull Context context) {
-        getAlarmManager(context).cancel(getUpdateDataPendingIntent(context));
+    private static void cancelUpdateDataAlarm(@NonNull Context context, int widgetId) {
+        getAlarmManager(context).cancel(getUpdateDataPendingIntent(context, widgetId));
     }
 
     @NonNull
@@ -335,9 +345,11 @@ public class RssWidget extends AppWidgetProvider {
     }
 
     @NonNull
-    private static PendingIntent getUpdateDataPendingIntent(@NonNull Context context) {
-        return PendingIntent.getBroadcast(context, RC_UPDATE_DATA,
-                new Intent(context, RssWidget.class).setAction(ACTION_UPDATE_DATA),
+    private static PendingIntent getUpdateDataPendingIntent(@NonNull Context context,
+            int widgetId) {
+        return PendingIntent.getBroadcast(context, getRequestCode(RC_UPDATE_DATA, widgetId),
+                new Intent(context, RssWidget.class).setAction(ACTION_UPDATE_DATA)
+                        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId),
                 PendingIntent.FLAG_CANCEL_CURRENT);
     }
 

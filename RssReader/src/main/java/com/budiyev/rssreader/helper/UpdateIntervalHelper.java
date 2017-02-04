@@ -37,6 +37,7 @@ public final class UpdateIntervalHelper {
     // @formatter:off
 
     public static final long[] INTERVALS = {
+            30 * DateUtils.SECOND_IN_MILLIS, // 30 seconds
             DateUtils.MINUTE_IN_MILLIS,      // 1 minute
             5 * DateUtils.MINUTE_IN_MILLIS,  // 5 minutes
             15 * DateUtils.MINUTE_IN_MILLIS, // 15 minutes
@@ -49,7 +50,7 @@ public final class UpdateIntervalHelper {
 
     // @formatter:on
 
-    public static final int DEFAULT_INTERVAL = 1;
+    public static final int DEFAULT_INTERVAL = 2;
 
     @NonNull
     public static String getDisplayName(@NonNull Context context, int index) {
@@ -59,7 +60,10 @@ public final class UpdateIntervalHelper {
     @NonNull
     public static String getDisplayName(@NonNull Context context, long interval) {
         Resources resources = context.getResources();
-        if (interval < DateUtils.HOUR_IN_MILLIS) {
+        if (interval < DateUtils.MINUTE_IN_MILLIS) {
+            int seconds = (int) (interval / DateUtils.SECOND_IN_MILLIS);
+            return resources.getQuantityString(R.plurals.seconds, seconds, seconds);
+        } else if (interval < DateUtils.HOUR_IN_MILLIS) {
             int minutes = (int) (interval / DateUtils.MINUTE_IN_MILLIS);
             return resources.getQuantityString(R.plurals.minutes, minutes, minutes);
         } else if (interval < DateUtils.DAY_IN_MILLIS) {

@@ -10,6 +10,10 @@
     <string name="text">Text</string>
     <string name="update_interval">Update interval</string>
 
+    <plurals name="seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
     <plurals name="minutes">
         <item quantity="one">%d minute</item>
         <item quantity="other">%d minutes</item>

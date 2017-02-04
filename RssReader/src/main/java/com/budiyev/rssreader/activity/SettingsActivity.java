@@ -47,9 +47,9 @@ import android.widget.TextView;
 import com.budiyev.rssreader.R;
 import com.budiyev.rssreader.adapter.UpdateIntervalAdapter;
 import com.budiyev.rssreader.helper.PreferencesHelper;
-import com.budiyev.rssreader.helper.ReaderHelper;
 import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
+import com.budiyev.rssreader.widget.RssWidget;
 
 import java.util.Objects;
 
@@ -186,11 +186,20 @@ public class SettingsActivity extends AppCompatActivity {
     private void saveSettings() {
         int widgetId = mWidgetId;
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            String oldUrl = PreferencesHelper.getUrl(this, widgetId);
-            PreferencesHelper.setUrl(this, widgetId, mRssFeedAddress);
-            PreferencesHelper.setUpdateInterval(this, widgetId, mUpdateInterval);
-            if (!Objects.equals(oldUrl, mRssFeedAddress)) {
-                ReaderHelper.updateFeed(this, widgetId);
+            String rssFeedAddress = mRssFeedAddress;
+            boolean urlChanged =
+                    !Objects.equals(PreferencesHelper.getUrl(this, widgetId), rssFeedAddress);
+            int updateInterval = mUpdateInterval;
+            boolean intervalChanged =
+                    PreferencesHelper.getUpdateInterval(this, widgetId) != updateInterval;
+            PreferencesHelper.setUrl(this, widgetId, rssFeedAddress);
+            PreferencesHelper.setUpdateInterval(this, widgetId, updateInterval);
+            if (urlChanged || intervalChanged) {
+                Intent intent =
+                        RssWidget.buildIntent(this, widgetId, RssWidget.ACTION_SETTINGS_CHANGED);
+                intent.putExtra(RssWidget.EXTRA_URL_CHANGED, urlChanged);
+                intent.putExtra(RssWidget.EXTRA_UPDATE_INTERVAL_CHANGED, intervalChanged);
+                sendBroadcast(intent);
             }
         }
     }
