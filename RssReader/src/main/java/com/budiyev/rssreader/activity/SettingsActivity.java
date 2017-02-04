@@ -24,11 +24,13 @@
 package com.budiyev.rssreader.activity;
 
 import android.appwidget.AppWidgetManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -36,22 +38,30 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.budiyev.rssreader.R;
+import com.budiyev.rssreader.adapter.UpdateIntervalAdapter;
 import com.budiyev.rssreader.helper.PreferencesHelper;
 import com.budiyev.rssreader.helper.ReaderHelper;
+import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
 
 import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
-    private int mWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private String mRssFeedAddress;
     private EditText mRssFeedAddressEditor;
+    private LinearLayout mUpdateIntervalLayout;
+    private TextView mUpdateIntervalText;
+    private AlertDialog mUpdateIntervalDialog;
+    private int mWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    private int mUpdateInterval = UpdateIntervalHelper.DEFAULT_INTERVAL;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,7 +120,29 @@ public class SettingsActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(url)) {
             mRssFeedAddressEditor.setText(url);
         }
+        mUpdateIntervalLayout = (LinearLayout) findViewById(R.id.update_interval_layout);
+        mUpdateIntervalText = (TextView) findViewById(R.id.update_interval_text);
+        setUpdateInterval(PreferencesHelper.getUpdateInterval(this, widgetId));
+        mUpdateIntervalDialog = new AlertDialog.Builder(this)
+                .setAdapter(new UpdateIntervalAdapter(this), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setUpdateInterval(which);
+                        mUpdateIntervalDialog.dismiss();
+                    }
+                }).create();
+        mUpdateIntervalLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mUpdateIntervalDialog.show();
+            }
+        });
         showKeyboard();
+    }
+
+    private void setUpdateInterval(int index) {
+        mUpdateInterval = index;
+        mUpdateIntervalText.setText(UpdateIntervalHelper.getDisplayName(this, index));
     }
 
     private void showKeyboard() {
@@ -159,6 +191,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             String oldUrl = PreferencesHelper.getUrl(this, widgetId);
             PreferencesHelper.setUrl(this, widgetId, mRssFeedAddress);
+            PreferencesHelper.setUpdateInterval(this, widgetId, mUpdateInterval);
             if (!Objects.equals(oldUrl, mRssFeedAddress)) {
                 ReaderHelper.updateFeed(this, widgetId);
             }
