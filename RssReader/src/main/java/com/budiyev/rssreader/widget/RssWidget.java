@@ -152,16 +152,17 @@ public class RssWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int widgetId : appWidgetIds) {
-            cancelUpdateDataAlarm(context, widgetId);
             updateWidget(context, appWidgetManager, widgetId);
+            cancelUpdateDataAlarm(context, widgetId);
+            long updateInterval = UpdateIntervalHelper.INTERVALS[PreferencesHelper
+                    .getUpdateInterval(context, widgetId)];
             long updateTime = PreferencesHelper.getUpdateTime(context, widgetId);
-            if (updateTime == PreferencesHelper.NOT_DEFINED) {
+            long elapsedTime = System.currentTimeMillis() - updateTime;
+            if (updateTime == PreferencesHelper.NOT_DEFINED || updateInterval <= elapsedTime) {
                 setUpdateDataAlarm(context, widgetId);
             } else {
-                setUpdateDataAlarm(context, widgetId, SystemClock.elapsedRealtime() +
-                        UpdateIntervalHelper.INTERVALS[PreferencesHelper
-                                .getUpdateInterval(context, widgetId)] -
-                        System.currentTimeMillis() - updateTime);
+                setUpdateDataAlarm(context, widgetId,
+                        SystemClock.elapsedRealtime() + updateInterval - elapsedTime);
             }
         }
     }
@@ -174,6 +175,7 @@ public class RssWidget extends AppWidgetProvider {
             PreferencesHelper.removeGuid(context, widgetId);
             PreferencesHelper.removePosition(context, widgetId);
             PreferencesHelper.removeUpdateInterval(context, widgetId);
+            PreferencesHelper.removeUpdateTime(context, widgetId);
         }
     }
 
