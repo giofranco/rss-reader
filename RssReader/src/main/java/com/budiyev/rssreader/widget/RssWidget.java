@@ -76,6 +76,7 @@ public class RssWidget extends AppWidgetProvider {
     private static final int RC_LINK = 102;
     private static final int RC_PREVIOUS = 103;
     private static final int RC_NEXT = 104;
+    private static final int RC_REFRESH = 105;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -97,6 +98,7 @@ public class RssWidget extends AppWidgetProvider {
                 setUpdateDataAlarm(context, widgetId);
             }
         } else if (ACTION_UPDATE_DATA.equals(action)) {
+            cancelUpdateDataAlarm(context, widgetId);
             ReaderHelper.updateFeed(context, widgetId, true);
             setUpdateDataAlarm(context, widgetId);
         } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
@@ -222,7 +224,10 @@ public class RssWidget extends AppWidgetProvider {
                 remoteViews = getDefaultRemoteViews(context);
                 if (position <= 0) {
                     remoteViews.setViewVisibility(R.id.previous, View.GONE);
+                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE);
+                    setRefreshOnClick(context, remoteViews, widgetId);
                 } else {
+                    remoteViews.setViewVisibility(R.id.refresh, View.GONE);
                     remoteViews.setViewVisibility(R.id.previous, View.VISIBLE);
                     setPreviousOnClick(context, remoteViews, widgetId);
                 }
@@ -305,6 +310,14 @@ public class RssWidget extends AppWidgetProvider {
                         PendingIntent.FLAG_CANCEL_CURRENT));
     }
 
+    private static void setRefreshOnClick(@NonNull Context context,
+            @NonNull RemoteViews remoteViews, int widgetId) {
+        Intent intent = buildIntent(context, widgetId, ACTION_UPDATE_DATA);
+        remoteViews.setOnClickPendingIntent(R.id.refresh, PendingIntent
+                .getBroadcast(context, getRequestCode(RC_REFRESH, widgetId), intent,
+                        PendingIntent.FLAG_CANCEL_CURRENT));
+    }
+
     private static int[] getAppwidgetIds(@NonNull Context context) {
         return AppWidgetManager.getInstance(context)
                 .getAppWidgetIds(new ComponentName(context, RssWidget.class));
@@ -348,8 +361,7 @@ public class RssWidget extends AppWidgetProvider {
     private static PendingIntent getUpdateDataPendingIntent(@NonNull Context context,
             int widgetId) {
         return PendingIntent.getBroadcast(context, getRequestCode(RC_UPDATE_DATA, widgetId),
-                new Intent(context, RssWidget.class).setAction(ACTION_UPDATE_DATA)
-                        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId),
+                buildIntent(context, widgetId, ACTION_UPDATE_DATA),
                 PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
