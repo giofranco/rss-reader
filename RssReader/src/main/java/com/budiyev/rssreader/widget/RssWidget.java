@@ -159,6 +159,7 @@ public class RssWidget extends AppWidgetProvider {
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
         for (int widgetId : appWidgetIds) {
+            cancelUpdateDataAlarm(context, widgetId);
             PreferencesHelper.removeUrl(context, widgetId);
             PreferencesHelper.removeFeed(context, widgetId);
             PreferencesHelper.removeGuid(context, widgetId);
