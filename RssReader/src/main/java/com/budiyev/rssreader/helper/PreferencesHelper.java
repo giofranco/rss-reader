@@ -193,7 +193,7 @@ public final class PreferencesHelper {
     }
 
     public static long getUpdateTime(@NonNull Context context, int widgetId) {
-        return getPreferences(context).getInt(getUpdateTimeKey(widgetId), -1);
+        return getPreferences(context).getLong(getUpdateTimeKey(widgetId), NOT_DEFINED);
     }
 
     @Nullable
