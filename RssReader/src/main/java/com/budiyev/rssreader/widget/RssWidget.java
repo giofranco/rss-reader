@@ -106,8 +106,7 @@ public class RssWidget extends AppWidgetProvider {
             int[] widgetIds = getAppwidgetIds(context);
             cancelUpdateDataAlarm(context, widgetIds);
             for (int id : widgetIds) {
-                ReaderHelper.updateFeed(context, id);
-                setUpdateDataAlarm(context, id);
+                setUpdateDataAlarmRemainingAndUpdateIfNeeded(context, id);
             }
         } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
             cancelUpdateDataAlarm(context, getAppwidgetIds(context));
@@ -117,8 +116,7 @@ public class RssWidget extends AppWidgetProvider {
             cancelUpdateDataAlarm(context, widgetIds);
             if (ConnectivityHelper.isConnectedToNetwork(context)) {
                 for (int id : widgetIds) {
-                    ReaderHelper.updateFeed(context, id);
-                    setUpdateDataAlarm(context, id);
+                    setUpdateDataAlarmRemainingAndUpdateIfNeeded(context, id);
                 }
             } else {
                 for (int id : widgetIds) {
@@ -162,16 +160,7 @@ public class RssWidget extends AppWidgetProvider {
         for (int widgetId : appWidgetIds) {
             updateWidget(context, appWidgetManager, widgetId);
             cancelUpdateDataAlarm(context, widgetId);
-            long updateInterval = UpdateIntervalHelper.INTERVALS[PreferencesHelper
-                    .getUpdateInterval(context, widgetId)];
-            long updateTime = PreferencesHelper.getUpdateTime(context, widgetId);
-            long elapsedTime = System.currentTimeMillis() - updateTime;
-            if (updateTime == PreferencesHelper.NOT_DEFINED || updateInterval <= elapsedTime) {
-                setUpdateDataAlarm(context, widgetId);
-            } else {
-                setUpdateDataAlarm(context, widgetId,
-                        SystemClock.elapsedRealtime() + updateInterval - elapsedTime);
-            }
+            setUpdateDataAlarmRemainingAndUpdateIfNeeded(context, widgetId);
         }
     }
 
@@ -374,6 +363,21 @@ public class RssWidget extends AppWidgetProvider {
     private static void setUpdateDataAlarm(@NonNull Context context, int widgetId, long time) {
         getAlarmManager(context).set(AlarmManager.ELAPSED_REALTIME_WAKEUP, time,
                 getUpdateDataPendingIntent(context, widgetId));
+    }
+
+    private void setUpdateDataAlarmRemainingAndUpdateIfNeeded(@NonNull Context context,
+            int widgetId) {
+        long updateInterval = UpdateIntervalHelper.INTERVALS[PreferencesHelper
+                .getUpdateInterval(context, widgetId)];
+        long updateTime = PreferencesHelper.getUpdateTime(context, widgetId);
+        long elapsedTime = System.currentTimeMillis() - updateTime;
+        if (updateTime == PreferencesHelper.NOT_DEFINED || updateInterval <= elapsedTime) {
+            ReaderHelper.updateFeed(context, widgetId);
+            setUpdateDataAlarm(context, widgetId);
+        } else {
+            setUpdateDataAlarm(context, widgetId,
+                    SystemClock.elapsedRealtime() + updateInterval - elapsedTime);
+        }
     }
 
     private static void cancelUpdateDataAlarm(@NonNull Context context, int widgetId) {
