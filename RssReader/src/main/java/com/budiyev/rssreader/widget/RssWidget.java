@@ -81,7 +81,8 @@ public class RssWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         PowerManager.WakeLock wakeLock = null;
-        if (intent.getBooleanExtra(EXTRA_USE_WAKE_LOCK, false)) {
+        boolean useWakeLock = intent.getBooleanExtra(EXTRA_USE_WAKE_LOCK, false);
+        if (useWakeLock) {
             wakeLock = WakeLockHelper.acquireWakeLock(context, WAKE_LOCK_TAG);
         }
         String action = intent.getAction();
@@ -99,7 +100,7 @@ public class RssWidget extends AppWidgetProvider {
             }
         } else if (ACTION_UPDATE_DATA.equals(action)) {
             cancelUpdateDataAlarm(context, widgetId);
-            ReaderHelper.updateFeed(context, widgetId, true);
+            ReaderHelper.updateFeed(context, widgetId, useWakeLock);
             setUpdateDataAlarm(context, widgetId);
         } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
             int[] appwidgetIds = getAppwidgetIds(context);
