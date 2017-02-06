@@ -150,6 +150,7 @@ public final class ReaderHelper {
                     }
                 }
             }
+            PreferencesHelper.setUpdateTime(mContext, mWidgetId, System.currentTimeMillis());
             sendUpdateIntent(mContext, mWidgetId, mUseWakeLock);
             WakeLockHelper.releaseWakeLock(wakeLock);
         }
