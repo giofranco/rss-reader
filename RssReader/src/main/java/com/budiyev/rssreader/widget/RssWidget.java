@@ -93,7 +93,7 @@ public class RssWidget extends AppWidgetProvider {
                 cancelUpdateDataAlarm(context, widgetId);
             }
             if (intent.getBooleanExtra(EXTRA_URL_CHANGED, false)) {
-                ReaderHelper.updateFeed(context, widgetId);
+                ReaderHelper.updateFeed(context, widgetId, useWakeLock);
             }
             if (interval) {
                 setUpdateDataAlarm(context, widgetId);
@@ -102,20 +102,27 @@ public class RssWidget extends AppWidgetProvider {
             cancelUpdateDataAlarm(context, widgetId);
             ReaderHelper.updateFeed(context, widgetId, useWakeLock);
             setUpdateDataAlarm(context, widgetId);
-        } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
-            int[] appwidgetIds = getAppwidgetIds(context);
-            for (int id : appwidgetIds) {
-                cancelUpdateDataAlarm(context, id);
+        } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+            int[] widgetIds = getAppwidgetIds(context);
+            cancelUpdateDataAlarm(context, widgetIds);
+            for (int id : widgetIds) {
+                ReaderHelper.updateFeed(context, id);
+                setUpdateDataAlarm(context, id);
             }
+        } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+            cancelUpdateDataAlarm(context, getAppwidgetIds(context));
+        } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            int[] widgetIds = getAppwidgetIds(context, manager);
+            cancelUpdateDataAlarm(context, widgetIds);
             if (ConnectivityHelper.isConnectedToNetwork(context)) {
-                for (int id : appwidgetIds) {
-                    ReaderHelper.updateFeed(context, id, true);
+                for (int id : widgetIds) {
+                    ReaderHelper.updateFeed(context, id);
                     setUpdateDataAlarm(context, id);
                 }
             } else {
-                AppWidgetManager instance = AppWidgetManager.getInstance(context);
-                for (int id : appwidgetIds) {
-                    updateWidget(context, instance, id);
+                for (int id : widgetIds) {
+                    updateWidget(context, manager, id);
                 }
             }
         } else if (ACTION_UPDATE_WIDGET.equals(action)) {
@@ -208,9 +215,9 @@ public class RssWidget extends AppWidgetProvider {
         }
     }
 
-    private static void updateWidget(@NonNull Context context,
-            @NonNull AppWidgetManager appWidgetManager, int widgetId) {
-        appWidgetManager.updateAppWidget(widgetId, getRemoteViews(context, widgetId));
+    private static void updateWidget(@NonNull Context context, @NonNull AppWidgetManager manager,
+            int widgetId) {
+        manager.updateAppWidget(widgetId, getRemoteViews(context, widgetId));
     }
 
     @NonNull
@@ -301,10 +308,7 @@ public class RssWidget extends AppWidgetProvider {
 
     private static void setLinkOnClick(@NonNull Context context, @NonNull RemoteViews remoteViews,
             @IdRes int viewId, @NonNull String link, int widgetId) {
-        if (!link.contains("://")) {
-            link = "http://" + link;
-        }
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(UrlHelper.validateScheme(link)));
         remoteViews.setOnClickPendingIntent(viewId, PendingIntent
                 .getActivity(context, getRequestCode(RC_LINK, widgetId), intent,
                         PendingIntent.FLAG_CANCEL_CURRENT));
@@ -335,8 +339,12 @@ public class RssWidget extends AppWidgetProvider {
     }
 
     private static int[] getAppwidgetIds(@NonNull Context context) {
-        return AppWidgetManager.getInstance(context)
-                .getAppWidgetIds(new ComponentName(context, RssWidget.class));
+        return getAppwidgetIds(context, AppWidgetManager.getInstance(context));
+    }
+
+    private static int[] getAppwidgetIds(@NonNull Context context,
+            @NonNull AppWidgetManager manager) {
+        return manager.getAppWidgetIds(new ComponentName(context, RssWidget.class));
     }
 
     private static boolean validateWidgetId(@NonNull Context context, int widgetId) {
@@ -370,6 +378,12 @@ public class RssWidget extends AppWidgetProvider {
 
     private static void cancelUpdateDataAlarm(@NonNull Context context, int widgetId) {
         getAlarmManager(context).cancel(getUpdateDataPendingIntent(context, widgetId));
+    }
+
+    private void cancelUpdateDataAlarm(@NonNull Context context, int[] widgetIds) {
+        for (int id : widgetIds) {
+            cancelUpdateDataAlarm(context, id);
+        }
     }
 
     @NonNull

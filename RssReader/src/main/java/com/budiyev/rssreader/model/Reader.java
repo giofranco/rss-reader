@@ -28,6 +28,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Xml;
 
+import com.budiyev.rssreader.helper.UrlHelper;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -54,12 +56,9 @@ public final class Reader {
     private final URL mUrl;
 
     private Reader(@NonNull String url) {
-        if (!url.contains("://")) {
-            url = "http://" + url;
-        }
         URL tmp;
         try {
-            tmp = new URL(url);
+            tmp = new URL(UrlHelper.validateScheme(url));
         } catch (MalformedURLException e) {
             Log.w(LOG_TAG, "Malformed URL", e);
             tmp = null;

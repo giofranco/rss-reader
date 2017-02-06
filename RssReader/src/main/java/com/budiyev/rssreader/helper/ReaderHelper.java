@@ -77,10 +77,10 @@ public final class ReaderHelper {
     }
 
     private static void sendUpdateIntent(@NonNull Context context, int widgetId,
-            boolean needWakeLock) {
+            boolean useWakeLock) {
         context.sendBroadcast(
                 RssWidget.buildIntent(context, widgetId, RssWidget.ACTION_UPDATE_WIDGET)
-                        .putExtra(RssWidget.EXTRA_USE_WAKE_LOCK, needWakeLock));
+                        .putExtra(RssWidget.EXTRA_USE_WAKE_LOCK, useWakeLock));
     }
 
     private static void setFirstMessage(@NonNull Context context, int widgetId,

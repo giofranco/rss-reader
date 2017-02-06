@@ -33,4 +33,13 @@ public final class UrlHelper {
     public static boolean validate(@NonNull String url) {
         return Patterns.WEB_URL.matcher(url).matches();
     }
+
+    @NonNull
+    public static String validateScheme(@NonNull String url) {
+        if (!url.contains("://")) {
+            return "http://" + url;
+        } else {
+            return url;
+        }
+    }
 }
