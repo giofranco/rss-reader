@@ -124,7 +124,7 @@ public class RssWidget extends AppWidgetProvider {
         } else if (ACTION_NEXT.equals(action)) {
             if (validateWidgetId(context, widgetId)) {
                 int position = PreferencesHelper.getPosition(context, widgetId);
-                if (position == PreferencesHelper.NO_POSITION || position == Integer.MAX_VALUE) {
+                if (position == PreferencesHelper.NOT_DEFINED || position == Integer.MAX_VALUE) {
                     position = 0;
                 } else {
                     position++;
@@ -152,7 +152,17 @@ public class RssWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int widgetId : appWidgetIds) {
+            cancelUpdateDataAlarm(context, widgetId);
             updateWidget(context, appWidgetManager, widgetId);
+            long updateTime = PreferencesHelper.getUpdateTime(context, widgetId);
+            if (updateTime == PreferencesHelper.NOT_DEFINED) {
+                setUpdateDataAlarm(context, widgetId);
+            } else {
+                setUpdateDataAlarm(context, widgetId, SystemClock.elapsedRealtime() +
+                        UpdateIntervalHelper.INTERVALS[PreferencesHelper
+                                .getUpdateInterval(context, widgetId)] -
+                        System.currentTimeMillis() - updateTime);
+            }
         }
     }
 
@@ -342,9 +352,13 @@ public class RssWidget extends AppWidgetProvider {
     }
 
     private static void setUpdateDataAlarm(@NonNull Context context, int widgetId) {
-        getAlarmManager(context).set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + UpdateIntervalHelper.INTERVALS[PreferencesHelper
-                        .getUpdateInterval(context, widgetId)],
+        setUpdateDataAlarm(context, widgetId, SystemClock.elapsedRealtime() +
+                UpdateIntervalHelper.INTERVALS[PreferencesHelper
+                        .getUpdateInterval(context, widgetId)]);
+    }
+
+    private static void setUpdateDataAlarm(@NonNull Context context, int widgetId, long time) {
+        getAlarmManager(context).set(AlarmManager.ELAPSED_REALTIME_WAKEUP, time,
                 getUpdateDataPendingIntent(context, widgetId));
     }
 

@@ -34,13 +34,14 @@ import com.budiyev.rssreader.model.Message;
 import java.util.List;
 
 public final class PreferencesHelper {
-    public static final int NO_POSITION = -1;
+    public static final int NOT_DEFINED = -1;
     private static final String PREFERENCES_NAME = "rss_reader_main";
     private static final String PREFIX_URL = "url_";
     private static final String PREFIX_FEED = "feed_";
     private static final String PREFIX_GUID = "guid_";
     private static final String PREFIX_POSITION = "position_";
     private static final String PREFIX_UPDATE_INTERVAL = "update_interval_";
+    private static final String PREFIX_UPDATE_TIME = "update_time_";
     private static final String NULL_STRING = "null";
     private static final char SEPARATOR = ',';
     private static final int COLUMN_TITLE = 0;
@@ -82,6 +83,11 @@ public final class PreferencesHelper {
     @NonNull
     private static String getUpdateIntervalKey(int widgetId) {
         return PREFIX_UPDATE_INTERVAL + widgetId;
+    }
+
+    @NonNull
+    private static String getUpdateTimeKey(int widgetId) {
+        return PREFIX_UPDATE_TIME + widgetId;
     }
 
     public static void removeUrl(@NonNull Context context, int widgetId) {
@@ -176,6 +182,18 @@ public final class PreferencesHelper {
     public static int getUpdateInterval(@NonNull Context context, int widgetId) {
         return getPreferences(context)
                 .getInt(getUpdateIntervalKey(widgetId), UpdateIntervalHelper.DEFAULT_INTERVAL);
+    }
+
+    public static void removeUpdateTime(@NonNull Context context, int widgetId) {
+        getPreferences(context).edit().remove(getUpdateTimeKey(widgetId)).apply();
+    }
+
+    public static void setUpdateTime(@NonNull Context context, int widgetId, long time) {
+        getPreferences(context).edit().putLong(getUpdateTimeKey(widgetId), time).apply();
+    }
+
+    public static long getUpdateTime(@NonNull Context context, int widgetId) {
+        return getPreferences(context).getInt(getUpdateTimeKey(widgetId), -1);
     }
 
     @Nullable

@@ -133,7 +133,7 @@ public final class ReaderHelper {
                 if (updateFeed == null) {
                     clearData(mContext, mWidgetId);
                 } else {
-                    if (position == PreferencesHelper.NO_POSITION || position == 0) {
+                    if (position == PreferencesHelper.NOT_DEFINED || position == 0) {
                         setFirstMessage(mContext, mWidgetId, updateFeed);
                     } else {
                         int updatePosition = CollectionsHelper
