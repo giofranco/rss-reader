@@ -196,11 +196,14 @@ public class RssWidget extends AppWidgetProvider {
                     PreferencesHelper.getPosition(context, oldWidgetId));
             PreferencesHelper.setUpdateInterval(context, newWidgetId,
                     PreferencesHelper.getUpdateInterval(context, oldWidgetId));
+            PreferencesHelper.setUpdateTime(context, newWidgetId,
+                    PreferencesHelper.getUpdateTime(context, oldWidgetId));
             PreferencesHelper.removeUrl(context, oldWidgetId);
             PreferencesHelper.removeFeed(context, oldWidgetId);
             PreferencesHelper.removeGuid(context, oldWidgetId);
             PreferencesHelper.removePosition(context, oldWidgetId);
             PreferencesHelper.removeUpdateInterval(context, oldWidgetId);
+            PreferencesHelper.removeUpdateTime(context, oldWidgetId);
         }
     }
 
