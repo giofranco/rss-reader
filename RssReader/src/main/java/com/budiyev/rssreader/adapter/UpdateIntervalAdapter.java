@@ -62,8 +62,7 @@ public class UpdateIntervalAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(mContext)
                     .inflate(R.layout.item_update_interval, parent, false);
         }
-        TextView textView = (TextView) convertView;
-        textView.setText(UpdateIntervalHelper.getDisplayName(mContext, position));
-        return textView;
+        ((TextView) convertView).setText(UpdateIntervalHelper.getDisplayName(mContext, position));
+        return convertView;
     }
 }
