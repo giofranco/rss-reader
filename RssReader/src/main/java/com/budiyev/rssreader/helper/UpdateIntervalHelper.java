@@ -31,12 +31,11 @@ import android.text.format.DateUtils;
 import com.budiyev.rssreader.R;
 
 public final class UpdateIntervalHelper {
-    private UpdateIntervalHelper() {
-    }
+    public static final int DEFAULT_INTERVAL = 2;
 
     // @formatter:off
 
-    public static final long[] INTERVALS = {
+    private static final long[] INTERVALS = {
             30 * DateUtils.SECOND_IN_MILLIS, // 30 seconds
             DateUtils.MINUTE_IN_MILLIS,      // 1 minute
             5 * DateUtils.MINUTE_IN_MILLIS,  // 5 minutes
@@ -50,27 +49,36 @@ public final class UpdateIntervalHelper {
 
     // @formatter:on
 
-    public static final int DEFAULT_INTERVAL = 2;
+    private UpdateIntervalHelper() {
+    }
 
-    @NonNull
-    public static String getDisplayName(@NonNull Context context, int index) {
-        return getDisplayName(context, INTERVALS[index]);
+    public static int getIntervalsCount() {
+        return INTERVALS.length;
+    }
+
+    public static long getIntervalMillis(int index) {
+        return INTERVALS[index];
     }
 
     @NonNull
-    public static String getDisplayName(@NonNull Context context, long interval) {
+    public static String getDisplayName(@NonNull Context context, int index) {
+        return getDisplayName(context, getIntervalMillis(index));
+    }
+
+    @NonNull
+    public static String getDisplayName(@NonNull Context context, long millis) {
         Resources resources = context.getResources();
-        if (interval < DateUtils.MINUTE_IN_MILLIS) {
-            int seconds = (int) (interval / DateUtils.SECOND_IN_MILLIS);
+        if (millis < DateUtils.MINUTE_IN_MILLIS) {
+            int seconds = (int) (millis / DateUtils.SECOND_IN_MILLIS);
             return resources.getQuantityString(R.plurals.seconds, seconds, seconds);
-        } else if (interval < DateUtils.HOUR_IN_MILLIS) {
-            int minutes = (int) (interval / DateUtils.MINUTE_IN_MILLIS);
+        } else if (millis < DateUtils.HOUR_IN_MILLIS) {
+            int minutes = (int) (millis / DateUtils.MINUTE_IN_MILLIS);
             return resources.getQuantityString(R.plurals.minutes, minutes, minutes);
-        } else if (interval < DateUtils.DAY_IN_MILLIS) {
-            int hours = (int) (interval / DateUtils.HOUR_IN_MILLIS);
+        } else if (millis < DateUtils.DAY_IN_MILLIS) {
+            int hours = (int) (millis / DateUtils.HOUR_IN_MILLIS);
             return resources.getQuantityString(R.plurals.hours, hours, hours);
         } else {
-            int days = (int) (interval / DateUtils.DAY_IN_MILLIS);
+            int days = (int) (millis / DateUtils.DAY_IN_MILLIS);
             return resources.getQuantityString(R.plurals.days, days, days);
         }
     }

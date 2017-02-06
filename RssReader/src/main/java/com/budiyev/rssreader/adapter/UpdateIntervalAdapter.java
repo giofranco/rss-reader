@@ -43,12 +43,12 @@ public class UpdateIntervalAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return UpdateIntervalHelper.INTERVALS.length;
+        return UpdateIntervalHelper.getIntervalsCount();
     }
 
     @Override
     public Object getItem(int position) {
-        return UpdateIntervalHelper.INTERVALS[position];
+        return UpdateIntervalHelper.getIntervalMillis(position);
     }
 
     @Override

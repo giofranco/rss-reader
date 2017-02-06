@@ -348,9 +348,8 @@ public class RssWidget extends AppWidgetProvider {
     }
 
     private static void setUpdateDataAlarm(@NonNull Context context, int widgetId) {
-        setUpdateDataAlarm(context, widgetId, SystemClock.elapsedRealtime() +
-                UpdateIntervalHelper.INTERVALS[PreferencesHelper
-                        .getUpdateInterval(context, widgetId)]);
+        setUpdateDataAlarm(context, widgetId, SystemClock.elapsedRealtime() + UpdateIntervalHelper
+                .getIntervalMillis(PreferencesHelper.getUpdateInterval(context, widgetId)));
     }
 
     private static void setUpdateDataAlarm(@NonNull Context context, int widgetId, long time) {
@@ -360,8 +359,8 @@ public class RssWidget extends AppWidgetProvider {
 
     private void setUpdateDataAlarmRemainingAndUpdateIfNeeded(@NonNull Context context,
             int widgetId) {
-        long updateInterval = UpdateIntervalHelper.INTERVALS[PreferencesHelper
-                .getUpdateInterval(context, widgetId)];
+        long updateInterval = UpdateIntervalHelper
+                .getIntervalMillis(PreferencesHelper.getUpdateInterval(context, widgetId));
         long updateTime = PreferencesHelper.getUpdateTime(context, widgetId);
         long elapsedTime = System.currentTimeMillis() - updateTime;
         if (updateTime == PreferencesHelper.NOT_DEFINED || updateInterval <= elapsedTime) {
