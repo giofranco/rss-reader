@@ -337,6 +337,7 @@ public class RssWidget extends AppWidgetProvider {
                 AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
+    @SuppressWarnings("deprecation")
     private static void setTextViewText(@NonNull RemoteViews remoteViews, @IdRes int viewId,
             @Nullable String text) {
         if (TextUtils.isEmpty(text)) {
