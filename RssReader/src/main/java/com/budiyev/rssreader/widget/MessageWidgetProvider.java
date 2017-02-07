@@ -109,6 +109,7 @@ public class MessageWidgetProvider extends AppWidgetProvider {
             if (ConnectivityHelper.isConnectedToNetwork(context)) {
                 for (int id : widgetIds) {
                     setUpdateDataAlarmRemainingAndUpdateIfNeeded(context, id);
+                    updateWidget(context, manager, id);
                 }
             } else {
                 for (int id : widgetIds) {
@@ -229,8 +230,12 @@ public class MessageWidgetProvider extends AppWidgetProvider {
                 remoteViews = getDefaultRemoteViews(context);
                 if (position <= 0) {
                     remoteViews.setViewVisibility(R.id.previous, View.GONE);
-                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE);
-                    setRefreshOnClick(context, remoteViews, widgetId);
+                    if (ConnectivityHelper.isConnectedToNetwork(context)) {
+                        remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE);
+                        setRefreshOnClick(context, remoteViews, widgetId);
+                    } else {
+                        remoteViews.setViewVisibility(R.id.refresh, View.GONE);
+                    }
                 } else {
                     remoteViews.setViewVisibility(R.id.refresh, View.GONE);
                     remoteViews.setViewVisibility(R.id.previous, View.VISIBLE);

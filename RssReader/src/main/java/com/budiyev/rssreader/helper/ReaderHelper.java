@@ -130,9 +130,7 @@ public final class ReaderHelper {
             } else {
                 int position = PreferencesHelper.getPosition(mContext, mWidgetId);
                 Feed updateFeed = Reader.read(url);
-                if (updateFeed == null) {
-                    clearData(mContext, mWidgetId);
-                } else {
+                if (updateFeed != null) {
                     if (position == PreferencesHelper.NOT_DEFINED || position == 0) {
                         setFirstMessage(mContext, mWidgetId, updateFeed);
                     } else {
