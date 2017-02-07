@@ -90,12 +90,6 @@ public final class ReaderHelper {
         PreferencesHelper.setGuid(context, widgetId, feed.getMessages().get(0).getGuid());
     }
 
-    private static void clearData(@NonNull Context context, int widgetId) {
-        PreferencesHelper.removeFeed(context, widgetId);
-        PreferencesHelper.removeGuid(context, widgetId);
-        PreferencesHelper.removePosition(context, widgetId);
-    }
-
     private static class ReadAction implements Runnable {
         private final Context mContext;
         private final int mWidgetId;
@@ -124,8 +118,6 @@ public final class ReaderHelper {
                 feed = Reader.read(url);
                 if (feed != null && !feed.getMessages().isEmpty()) {
                     setFirstMessage(mContext, mWidgetId, feed);
-                } else {
-                    clearData(mContext, mWidgetId);
                 }
             } else {
                 int position = PreferencesHelper.getPosition(mContext, mWidgetId);

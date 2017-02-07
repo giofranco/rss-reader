@@ -93,6 +93,7 @@ public class MessageWidgetProvider extends AppWidgetProvider {
                 cancelUpdateDataAlarm(context, widgetId);
             }
             if (intent.getBooleanExtra(EXTRA_URL_CHANGED, false)) {
+                clearFeed(context, widgetId);
                 ReaderHelper.updateFeed(context, widgetId, useWakeLock);
             }
             if (interval) {
@@ -161,12 +162,7 @@ public class MessageWidgetProvider extends AppWidgetProvider {
     public void onDeleted(Context context, int[] appWidgetIds) {
         for (int widgetId : appWidgetIds) {
             cancelUpdateDataAlarm(context, widgetId);
-            PreferencesHelper.removeUrl(context, widgetId);
-            PreferencesHelper.removeFeed(context, widgetId);
-            PreferencesHelper.removeGuid(context, widgetId);
-            PreferencesHelper.removePosition(context, widgetId);
-            PreferencesHelper.removeUpdateInterval(context, widgetId);
-            PreferencesHelper.removeUpdateTime(context, widgetId);
+            clearPreferences(context, widgetId);
         }
     }
 
@@ -189,12 +185,7 @@ public class MessageWidgetProvider extends AppWidgetProvider {
                     PreferencesHelper.getUpdateInterval(context, oldWidgetId));
             PreferencesHelper.setUpdateTime(context, newWidgetId,
                     PreferencesHelper.getUpdateTime(context, oldWidgetId));
-            PreferencesHelper.removeUrl(context, oldWidgetId);
-            PreferencesHelper.removeFeed(context, oldWidgetId);
-            PreferencesHelper.removeGuid(context, oldWidgetId);
-            PreferencesHelper.removePosition(context, oldWidgetId);
-            PreferencesHelper.removeUpdateInterval(context, oldWidgetId);
-            PreferencesHelper.removeUpdateTime(context, oldWidgetId);
+            clearPreferences(context, oldWidgetId);
         }
     }
 
@@ -399,6 +390,19 @@ public class MessageWidgetProvider extends AppWidgetProvider {
         return PendingIntent.getBroadcast(context, getRequestCode(RC_UPDATE_DATA, widgetId),
                 buildIntent(context, widgetId, ACTION_UPDATE_DATA)
                         .putExtra(EXTRA_USE_WAKE_LOCK, true), PendingIntent.FLAG_CANCEL_CURRENT);
+    }
+
+    private static void clearPreferences(@NonNull Context context, int widgetId) {
+        PreferencesHelper.removeUrl(context, widgetId);
+        PreferencesHelper.removeUpdateInterval(context, widgetId);
+        PreferencesHelper.removeUpdateTime(context, widgetId);
+        clearFeed(context, widgetId);
+    }
+
+    private static void clearFeed(@NonNull Context context, int widgetId) {
+        PreferencesHelper.removeFeed(context, widgetId);
+        PreferencesHelper.removeGuid(context, widgetId);
+        PreferencesHelper.removePosition(context, widgetId);
     }
 
     private static int getRequestCode(int base, int widgetId) {
