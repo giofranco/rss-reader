@@ -56,7 +56,7 @@ import com.budiyev.rssreader.model.Message;
 
 import java.util.List;
 
-public class MessageWidget extends AppWidgetProvider {
+public class MessageWidgetProvider extends AppWidgetProvider {
     public static final String ACTION_UPDATE_WIDGET =
             "com.yotatest.budiyev.rssreader.widget.ACTION_UPDATE_WIDGET";
     public static final String ACTION_SETTINGS_CHANGED =
@@ -263,7 +263,7 @@ public class MessageWidget extends AppWidgetProvider {
     @NonNull
     public static Intent buildIntent(@NonNull Context context, int widgetId,
             @Nullable String action) {
-        Intent intent = new Intent(context, MessageWidget.class);
+        Intent intent = new Intent(context, MessageWidgetProvider.class);
         intent.setAction(action);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         return intent;
@@ -326,7 +326,7 @@ public class MessageWidget extends AppWidgetProvider {
 
     private static int[] getAppwidgetIds(@NonNull Context context,
             @NonNull AppWidgetManager manager) {
-        return manager.getAppWidgetIds(new ComponentName(context, MessageWidget.class));
+        return manager.getAppWidgetIds(new ComponentName(context, MessageWidgetProvider.class));
     }
 
     private static boolean validateWidgetId(@NonNull Context context, int widgetId) {
