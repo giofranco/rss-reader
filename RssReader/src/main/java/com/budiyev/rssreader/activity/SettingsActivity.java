@@ -49,7 +49,7 @@ import com.budiyev.rssreader.adapter.UpdateIntervalAdapter;
 import com.budiyev.rssreader.helper.PreferencesHelper;
 import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
-import com.budiyev.rssreader.widget.RssWidget;
+import com.budiyev.rssreader.widget.FeedWidget;
 
 import java.util.Objects;
 
@@ -196,9 +196,9 @@ public class SettingsActivity extends AppCompatActivity {
             PreferencesHelper.setUpdateInterval(this, widgetId, updateInterval);
             if (urlChanged || intervalChanged) {
                 Intent intent =
-                        RssWidget.buildIntent(this, widgetId, RssWidget.ACTION_SETTINGS_CHANGED);
-                intent.putExtra(RssWidget.EXTRA_URL_CHANGED, urlChanged);
-                intent.putExtra(RssWidget.EXTRA_UPDATE_INTERVAL_CHANGED, intervalChanged);
+                        FeedWidget.buildIntent(this, widgetId, FeedWidget.ACTION_SETTINGS_CHANGED);
+                intent.putExtra(FeedWidget.EXTRA_URL_CHANGED, urlChanged);
+                intent.putExtra(FeedWidget.EXTRA_UPDATE_INTERVAL_CHANGED, intervalChanged);
                 sendBroadcast(intent);
             }
         }

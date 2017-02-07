@@ -31,7 +31,7 @@ import android.text.TextUtils;
 import com.budiyev.rssreader.model.Feed;
 import com.budiyev.rssreader.model.Message;
 import com.budiyev.rssreader.model.Reader;
-import com.budiyev.rssreader.widget.RssWidget;
+import com.budiyev.rssreader.widget.FeedWidget;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -79,8 +79,8 @@ public final class ReaderHelper {
     private static void sendUpdateIntent(@NonNull Context context, int widgetId,
             boolean useWakeLock) {
         context.sendBroadcast(
-                RssWidget.buildIntent(context, widgetId, RssWidget.ACTION_UPDATE_WIDGET)
-                        .putExtra(RssWidget.EXTRA_USE_WAKE_LOCK, useWakeLock));
+                FeedWidget.buildIntent(context, widgetId, FeedWidget.ACTION_UPDATE_WIDGET)
+                        .putExtra(FeedWidget.EXTRA_USE_WAKE_LOCK, useWakeLock));
     }
 
     private static void setFirstMessage(@NonNull Context context, int widgetId,

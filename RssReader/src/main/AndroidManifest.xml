@@ -19,7 +19,7 @@
 
         <activity android:name=".activity.SettingsActivity"/>
 
-        <receiver android:name=".widget.RssWidget">
+        <receiver android:name=".widget.FeedWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action
