@@ -2,7 +2,7 @@
 <appwidget-provider
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:configure="com.budiyev.rssreader.activity.SettingsActivity"
-    android:initialLayout="@layout/widget_rss_default"
+    android:initialLayout="@layout/widget_message_default"
     android:minHeight="110dp"
     android:minWidth="110dp"
     android:previewImage="@mipmap/ic_launcher"

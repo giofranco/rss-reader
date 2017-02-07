@@ -271,12 +271,12 @@ public class MessageWidgetProvider extends AppWidgetProvider {
 
     @NonNull
     private static RemoteViews getDefaultRemoteViews(@NonNull Context context) {
-        return new RemoteViews(context.getPackageName(), R.layout.widget_rss_default);
+        return new RemoteViews(context.getPackageName(), R.layout.widget_message_default);
     }
 
     @NonNull
     private static RemoteViews getErrorRemoteViews(@NonNull Context context) {
-        return new RemoteViews(context.getPackageName(), R.layout.widget_rss_error);
+        return new RemoteViews(context.getPackageName(), R.layout.widget_message_error);
     }
 
     private static void setSettingsOnClick(@NonNull Context context,
