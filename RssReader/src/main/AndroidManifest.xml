@@ -29,7 +29,7 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/rss_widget_provider"/>
+                android:resource="@xml/widget_provider_message"/>
         </receiver>
     </application>
 </manifest>
