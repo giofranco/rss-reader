@@ -28,8 +28,8 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.budiyev.rssreader.model.Feed;
-import com.budiyev.rssreader.model.Message;
+import com.budiyev.rssreader.model.data.Feed;
+import com.budiyev.rssreader.model.data.Message;
 
 import java.util.List;
 

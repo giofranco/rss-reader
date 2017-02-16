@@ -21,26 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.budiyev.rssreader.model;
+package com.budiyev.rssreader.model.data;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
-public class Message {
+public class Feed implements Iterable<Message> {
     private final String mTitle;
     private final String mDescription;
     private final String mLink;
-    private final String mAuthor;
-    private final String mGuid;
+    private final String mLanguage;
+    private final String mCopyright;
+    private final String mPublishDate;
+    private final List<Message> mMessages = new ArrayList<>();
 
-    public Message(@Nullable String title, @Nullable String description, @Nullable String link,
-            @Nullable String author, @Nullable String guid) {
+    public Feed(@Nullable String title, @Nullable String description, @Nullable String link,
+            @Nullable String language, @Nullable String copyright, @Nullable String publishDate) {
         mTitle = title;
         mDescription = description;
         mLink = link;
-        mAuthor = author;
-        mGuid = guid;
+        mLanguage = language;
+        mCopyright = copyright;
+        mPublishDate = publishDate;
     }
 
     @Nullable
@@ -59,30 +66,49 @@ public class Message {
     }
 
     @Nullable
-    public String getAuthor() {
-        return mAuthor;
+    public String getLanguage() {
+        return mLanguage;
     }
 
     @Nullable
-    public String getGuid() {
-        return mGuid;
+    public String getCopyright() {
+        return mCopyright;
+    }
+
+    @Nullable
+    public String getPublishDate() {
+        return mPublishDate;
+    }
+
+    @NonNull
+    public List<Message> getMessages() {
+        return mMessages;
+    }
+
+    @Override
+    public Iterator<Message> iterator() {
+        return mMessages.iterator();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTitle, mDescription, mLink, mAuthor, mGuid);
+        return Objects
+                .hash(mTitle, mLink, mDescription, mLanguage, mCopyright, mPublishDate, mMessages);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
-        } else if (obj instanceof Message) {
-            Message other = (Message) obj;
+        } else if (obj instanceof Feed) {
+            Feed other = (Feed) obj;
             return Objects.equals(mTitle, other.mTitle) &&
                     Objects.equals(mDescription, other.mDescription) &&
-                    Objects.equals(mLink, other.mLink) && Objects.equals(mAuthor, other.mAuthor) &&
-                    Objects.equals(mGuid, other.mGuid);
+                    Objects.equals(mLink, other.mLink) &&
+                    Objects.equals(mLanguage, other.mLanguage) &&
+                    Objects.equals(mCopyright, other.mCopyright) &&
+                    Objects.equals(mPublishDate, other.mPublishDate) &&
+                    Objects.equals(mMessages, other.mMessages);
         } else {
             return false;
         }
@@ -90,7 +116,8 @@ public class Message {
 
     @Override
     public String toString() {
-        return "Message [title = " + mTitle + ", description = " + mDescription + ", link = " +
-                mLink + ", author = " + mAuthor + ", GUID = " + mGuid + "]";
+        return "Feed [title = " + mTitle + ", description = " + mDescription + ", link = " + mLink +
+                ", language = " + mLanguage + ", copyright = " + mCopyright + ", publish date = " +
+                mPublishDate + ", messages number = " + mMessages.size() + "]";
     }
 }

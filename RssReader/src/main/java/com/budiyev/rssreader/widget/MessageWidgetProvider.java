@@ -51,8 +51,8 @@ import com.budiyev.rssreader.helper.ReaderHelper;
 import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
 import com.budiyev.rssreader.helper.WakeLockHelper;
-import com.budiyev.rssreader.model.Feed;
-import com.budiyev.rssreader.model.Message;
+import com.budiyev.rssreader.model.data.Feed;
+import com.budiyev.rssreader.model.data.Message;
 
 import java.util.List;
 

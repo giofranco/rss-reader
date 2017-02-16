@@ -21,33 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.budiyev.rssreader.model;
+package com.budiyev.rssreader.model.data;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
-public class Feed implements Iterable<Message> {
+public class Message {
     private final String mTitle;
     private final String mDescription;
     private final String mLink;
-    private final String mLanguage;
-    private final String mCopyright;
-    private final String mPublishDate;
-    private final List<Message> mMessages = new ArrayList<>();
+    private final String mAuthor;
+    private final String mGuid;
 
-    public Feed(@Nullable String title, @Nullable String description, @Nullable String link,
-            @Nullable String language, @Nullable String copyright, @Nullable String publishDate) {
+    public Message(@Nullable String title, @Nullable String description, @Nullable String link,
+            @Nullable String author, @Nullable String guid) {
         mTitle = title;
         mDescription = description;
         mLink = link;
-        mLanguage = language;
-        mCopyright = copyright;
-        mPublishDate = publishDate;
+        mAuthor = author;
+        mGuid = guid;
     }
 
     @Nullable
@@ -66,49 +59,30 @@ public class Feed implements Iterable<Message> {
     }
 
     @Nullable
-    public String getLanguage() {
-        return mLanguage;
+    public String getAuthor() {
+        return mAuthor;
     }
 
     @Nullable
-    public String getCopyright() {
-        return mCopyright;
-    }
-
-    @Nullable
-    public String getPublishDate() {
-        return mPublishDate;
-    }
-
-    @NonNull
-    public List<Message> getMessages() {
-        return mMessages;
-    }
-
-    @Override
-    public Iterator<Message> iterator() {
-        return mMessages.iterator();
+    public String getGuid() {
+        return mGuid;
     }
 
     @Override
     public int hashCode() {
-        return Objects
-                .hash(mTitle, mLink, mDescription, mLanguage, mCopyright, mPublishDate, mMessages);
+        return Objects.hash(mTitle, mDescription, mLink, mAuthor, mGuid);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
-        } else if (obj instanceof Feed) {
-            Feed other = (Feed) obj;
+        } else if (obj instanceof Message) {
+            Message other = (Message) obj;
             return Objects.equals(mTitle, other.mTitle) &&
                     Objects.equals(mDescription, other.mDescription) &&
-                    Objects.equals(mLink, other.mLink) &&
-                    Objects.equals(mLanguage, other.mLanguage) &&
-                    Objects.equals(mCopyright, other.mCopyright) &&
-                    Objects.equals(mPublishDate, other.mPublishDate) &&
-                    Objects.equals(mMessages, other.mMessages);
+                    Objects.equals(mLink, other.mLink) && Objects.equals(mAuthor, other.mAuthor) &&
+                    Objects.equals(mGuid, other.mGuid);
         } else {
             return false;
         }
@@ -116,8 +90,7 @@ public class Feed implements Iterable<Message> {
 
     @Override
     public String toString() {
-        return "Feed [title = " + mTitle + ", description = " + mDescription + ", link = " + mLink +
-                ", language = " + mLanguage + ", copyright = " + mCopyright + ", publish date = " +
-                mPublishDate + ", messages number = " + mMessages.size() + "]";
+        return "Message [title = " + mTitle + ", description = " + mDescription + ", link = " +
+                mLink + ", author = " + mAuthor + ", GUID = " + mGuid + "]";
     }
 }

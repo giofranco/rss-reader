@@ -28,9 +28,9 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.budiyev.rssreader.model.Feed;
-import com.budiyev.rssreader.model.Message;
-import com.budiyev.rssreader.model.Reader;
+import com.budiyev.rssreader.model.data.Feed;
+import com.budiyev.rssreader.model.data.Message;
+import com.budiyev.rssreader.model.data.Reader;
 import com.budiyev.rssreader.widget.MessageWidgetProvider;
 
 import java.util.Objects;
