@@ -133,7 +133,7 @@ public final class Reader {
         for (; ; ) {
             int eventType = parser.getEventType();
             if (eventType == XmlPullParser.END_DOCUMENT ||
-                    CHANNEL.equals(parser.getName()) && eventType == XmlPullParser.END_TAG) {
+                    eventType == XmlPullParser.END_TAG && CHANNEL.equals(parser.getName())) {
                 break;
             }
             if (eventType != XmlPullParser.START_TAG) {
@@ -158,9 +158,13 @@ public final class Reader {
             if (parser.next() == XmlPullParser.END_DOCUMENT) {
                 break;
             }
+            int eventType = parser.getEventType();
             name = parser.getName();
-            if (ITEM.equals(name) && parser.getEventType() == XmlPullParser.END_TAG) {
+            if (eventType == XmlPullParser.END_TAG && ITEM.equals(name)) {
                 break;
+            }
+            if (eventType != XmlPullParser.START_TAG) {
+                continue;
             }
             if (TITLE.equals(name)) {
                 title = readText(parser);
