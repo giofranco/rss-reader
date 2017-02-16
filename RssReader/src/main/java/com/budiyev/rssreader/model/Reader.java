@@ -36,7 +36,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -53,26 +52,22 @@ public final class Reader {
     private static final String ITEM = "item";
     private static final String PUBLISH_DATE = "pubDate";
     private static final String GUID = "guid";
-    private final URL mUrl;
 
-    private Reader(@NonNull String url) {
-        URL tmp;
-        try {
-            tmp = new URL(UrlHelper.validateScheme(url));
-        } catch (MalformedURLException e) {
-            Log.w(LOG_TAG, "Malformed URL", e);
-            tmp = null;
-        }
-        mUrl = tmp;
+    private Reader() {
     }
 
+    /**
+     * Read RSS feed by specified URL-address
+     *
+     * @param urlString URL-address of the feed
+     * @return Feed or {@code null} if the feed can't be read from the specified URL-address
+     */
     @Nullable
-    private Feed read() {
-        if (mUrl == null) {
-            return null;
-        }
+    public static Feed read(@NonNull String urlString) {
         try {
-            HttpURLConnection connection = (HttpURLConnection) mUrl.openConnection();
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL(UrlHelper.validateScheme(urlString))
+                            .openConnection();
             try (InputStream input = connection.getInputStream()) {
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -81,13 +76,13 @@ public final class Reader {
                 return readMessages(parser, readFeedInfo(parser));
             }
         } catch (XmlPullParserException | IOException e) {
-            Log.w(LOG_TAG, "Unable to read RSS feed", e);
+            Log.w(LOG_TAG, "Unable to read RSS feed.", e);
             return null;
         }
     }
 
     @NonNull
-    private Feed readFeedInfo(@NonNull XmlPullParser parser) throws IOException,
+    private static Feed readFeedInfo(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
         requireTag(parser, RSS);
         parser.nextTag();
@@ -127,8 +122,8 @@ public final class Reader {
     }
 
     @NonNull
-    private Feed readMessages(@NonNull XmlPullParser parser, @NonNull Feed feed) throws IOException,
-            XmlPullParserException {
+    private static Feed readMessages(@NonNull XmlPullParser parser, @NonNull Feed feed) throws
+            IOException, XmlPullParserException {
         List<Message> messages = feed.getMessages();
         for (; ; ) {
             int eventType = parser.getEventType();
@@ -146,7 +141,7 @@ public final class Reader {
     }
 
     @NonNull
-    private Message readMessage(@NonNull XmlPullParser parser) throws IOException,
+    private static Message readMessage(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
         requireTag(parser, ITEM);
         String title = null;
@@ -182,7 +177,7 @@ public final class Reader {
     }
 
     @Nullable
-    private String readText(@NonNull XmlPullParser parser) throws IOException,
+    private static String readText(@NonNull XmlPullParser parser) throws IOException,
             XmlPullParserException {
         String result = null;
         if (parser.next() == XmlPullParser.TEXT) {
@@ -192,19 +187,8 @@ public final class Reader {
         return result;
     }
 
-    private void requireTag(@NonNull XmlPullParser parser, @Nullable String name) throws
+    private static void requireTag(@NonNull XmlPullParser parser, @Nullable String name) throws
             IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, name);
-    }
-
-    /**
-     * Read RSS feed by specified URL-address
-     *
-     * @param url URL-address of the feed
-     * @return Feed or {@code null} if the feed can't be read from the specified URL-address
-     */
-    @Nullable
-    public static Feed read(@NonNull String url) {
-        return new Reader(url).read();
     }
 }
