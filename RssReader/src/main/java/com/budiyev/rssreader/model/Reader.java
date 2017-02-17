@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.budiyev.rssreader.model.data;
+package com.budiyev.rssreader.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
