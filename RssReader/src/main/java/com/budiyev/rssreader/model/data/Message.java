@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.budiyev.rssreader.model;
+package com.budiyev.rssreader.model.data;
 
 import android.support.annotation.Nullable;
 
@@ -70,22 +70,17 @@ public class Message {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTitle, mDescription, mLink, mAuthor, mGuid);
+        if (mGuid == null) {
+            return 0;
+        } else {
+            return mGuid.hashCode();
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        } else if (obj instanceof Message) {
-            Message other = (Message) obj;
-            return Objects.equals(mTitle, other.mTitle) &&
-                    Objects.equals(mDescription, other.mDescription) &&
-                    Objects.equals(mLink, other.mLink) && Objects.equals(mAuthor, other.mAuthor) &&
-                    Objects.equals(mGuid, other.mGuid);
-        } else {
-            return false;
-        }
+        return obj == this ||
+                obj instanceof Message && Objects.equals(mGuid, ((Message) obj).mGuid);
     }
 
     @Override

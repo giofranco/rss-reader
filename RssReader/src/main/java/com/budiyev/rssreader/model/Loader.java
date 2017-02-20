@@ -29,6 +29,9 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.budiyev.rssreader.helper.UrlHelper;
+import com.budiyev.rssreader.model.data.Feed;
+import com.budiyev.rssreader.model.data.FeedInfo;
+import com.budiyev.rssreader.model.data.Message;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -39,7 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-public final class Reader {
+public final class Loader {
     private static final String LOG_TAG = "Reader";
     private static final String RSS = "rss";
     private static final String CHANNEL = "channel";
@@ -53,7 +56,7 @@ public final class Reader {
     private static final String PUBLISH_DATE = "pubDate";
     private static final String GUID = "guid";
 
-    private Reader() {
+    private Loader() {
     }
 
     /**
@@ -63,17 +66,16 @@ public final class Reader {
      * @return Feed or {@code null} if the feed can't be read from the specified URL-address
      */
     @Nullable
-    public static Feed read(@NonNull String urlString) {
+    public static Feed loadFeed(@NonNull String urlString) {
+        urlString = UrlHelper.validateScheme(urlString);
         try {
-            HttpURLConnection connection =
-                    (HttpURLConnection) new URL(UrlHelper.validateScheme(urlString))
-                            .openConnection();
+            HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
             try (InputStream input = connection.getInputStream()) {
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
                 parser.setInput(input, connection.getContentEncoding());
                 parser.nextTag();
-                return readMessages(parser, readFeedInfo(parser));
+                return readMessages(parser, readFeedInfo(urlString, parser));
             }
         } catch (XmlPullParserException | IOException e) {
             Log.w(LOG_TAG, "Unable to read RSS feed.", e);
@@ -81,9 +83,34 @@ public final class Reader {
         }
     }
 
+    /**
+     * Read RSS feed info by specified URL-address
+     *
+     * @param urlString URL-address of the feed
+     * @return Feed info or {@code null} if the feed info can't be read
+     * from the specified URL-address
+     */
+    @Nullable
+    public static FeedInfo loadInfo(@NonNull String urlString) {
+        urlString = UrlHelper.validateScheme(urlString);
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
+            try (InputStream input = connection.getInputStream()) {
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                parser.setInput(input, connection.getContentEncoding());
+                parser.nextTag();
+                return readFeedInfo(urlString, parser);
+            }
+        } catch (XmlPullParserException | IOException e) {
+            Log.w(LOG_TAG, "Unable to read feed info.", e);
+            return null;
+        }
+    }
+
     @NonNull
-    private static Feed readFeedInfo(@NonNull XmlPullParser parser) throws IOException,
-            XmlPullParserException {
+    private static FeedInfo readFeedInfo(@NonNull String urlString,
+            @NonNull XmlPullParser parser) throws IOException, XmlPullParserException {
         requireTag(parser, RSS);
         parser.nextTag();
         requireTag(parser, CHANNEL);
@@ -118,12 +145,13 @@ public final class Reader {
                 publishDate = readText(parser);
             }
         }
-        return new Feed(title, description, link, language, copyright, publishDate);
+        return new FeedInfo(urlString, title, description, link, language, copyright, publishDate);
     }
 
     @NonNull
-    private static Feed readMessages(@NonNull XmlPullParser parser, @NonNull Feed feed) throws
-            IOException, XmlPullParserException {
+    private static Feed readMessages(@NonNull XmlPullParser parser,
+            @NonNull FeedInfo feedInfo) throws IOException, XmlPullParserException {
+        Feed feed = new Feed(feedInfo);
         List<Message> messages = feed.getMessages();
         for (; ; ) {
             int eventType = parser.getEventType();

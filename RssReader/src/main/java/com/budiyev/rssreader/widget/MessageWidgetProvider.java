@@ -37,7 +37,6 @@ import android.os.SystemClock;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -46,13 +45,16 @@ import com.budiyev.rssreader.R;
 import com.budiyev.rssreader.activity.SettingsActivity;
 import com.budiyev.rssreader.helper.CollectionsHelper;
 import com.budiyev.rssreader.helper.ConnectivityHelper;
-import com.budiyev.rssreader.helper.PreferencesHelper;
-import com.budiyev.rssreader.helper.ReaderHelper;
+import com.budiyev.rssreader.helper.TextHelper;
 import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
 import com.budiyev.rssreader.helper.WakeLockHelper;
-import com.budiyev.rssreader.model.Feed;
-import com.budiyev.rssreader.model.Message;
+import com.budiyev.rssreader.model.Provider;
+import com.budiyev.rssreader.model.Repository;
+import com.budiyev.rssreader.model.data.Feed;
+import com.budiyev.rssreader.model.data.Message;
+import com.budiyev.rssreader.model.preferences.Constants;
+import com.budiyev.rssreader.model.preferences.Preferences;
 
 import java.util.List;
 
@@ -64,13 +66,12 @@ public class MessageWidgetProvider extends AppWidgetProvider {
     public static final String EXTRA_USE_WAKE_LOCK = "use_wake_lock";
     public static final String EXTRA_URL_CHANGED = "url_changed";
     public static final String EXTRA_UPDATE_INTERVAL_CHANGED = "update_interval_changed";
-    private static final String WAKE_LOCK_TAG = "RssWidget";
+    private static final String WAKE_LOCK_TAG = MessageWidgetProvider.class.getName();
     private static final String ACTION_UPDATE_DATA =
             "com.yotatest.budiyev.rssreader.widget.ACTION_UPDATE_DATA";
     private static final String ACTION_NEXT = "com.yotatest.budiyev.rssreader.widget.ACTION_NEXT";
     private static final String ACTION_PREVIOUS =
             "com.yotatest.budiyev.rssreader.widget.ACTION_PREVIOUS";
-    private static final String EM_DASH = "\u2014";
     private static final int RC_UPDATE_DATA = 100;
     private static final int RC_SETTINGS = 101;
     private static final int RC_LINK = 102;
@@ -94,14 +95,14 @@ public class MessageWidgetProvider extends AppWidgetProvider {
             }
             if (intent.getBooleanExtra(EXTRA_URL_CHANGED, false)) {
                 clearFeed(context, widgetId);
-                ReaderHelper.updateFeed(context, widgetId, useWakeLock);
+                Provider.updateFeed(context, widgetId, useWakeLock);
             }
             if (interval) {
                 setUpdateDataAlarm(context, widgetId);
             }
         } else if (ACTION_UPDATE_DATA.equals(action)) {
             cancelUpdateDataAlarm(context, widgetId);
-            ReaderHelper.updateFeed(context, widgetId, useWakeLock);
+            Provider.updateFeed(context, widgetId, useWakeLock);
             setUpdateDataAlarm(context, widgetId);
         } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
@@ -123,24 +124,24 @@ public class MessageWidgetProvider extends AppWidgetProvider {
             }
         } else if (ACTION_NEXT.equals(action)) {
             if (validateWidgetId(context, widgetId)) {
-                int position = PreferencesHelper.getPosition(context, widgetId);
-                if (position == PreferencesHelper.NOT_DEFINED || position == Integer.MAX_VALUE) {
+                int position = Preferences.getPosition(context, widgetId);
+                if (position == Constants.NOT_DEFINED || position == Integer.MAX_VALUE) {
                     position = 0;
                 } else {
                     position++;
                 }
-                PreferencesHelper.setPosition(context, widgetId, position);
+                Preferences.setPosition(context, widgetId, position);
                 updateWidget(context, AppWidgetManager.getInstance(context), widgetId);
             }
         } else if (ACTION_PREVIOUS.equals(action)) {
             if (validateWidgetId(context, widgetId)) {
-                int position = PreferencesHelper.getPosition(context, widgetId);
+                int position = Preferences.getPosition(context, widgetId);
                 if (position <= 1) {
                     position = 0;
                 } else {
                     position--;
                 }
-                PreferencesHelper.setPosition(context, widgetId, position);
+                Preferences.setPosition(context, widgetId, position);
                 updateWidget(context, AppWidgetManager.getInstance(context), widgetId);
             }
         } else {
@@ -171,20 +172,14 @@ public class MessageWidgetProvider extends AppWidgetProvider {
         for (int i = 0; i < oldWidgetIds.length; i++) {
             int oldWidgetId = oldWidgetIds[i];
             int newWidgetId = newWidgetIds[i];
-            PreferencesHelper
-                    .setUrl(context, newWidgetId, PreferencesHelper.getUrl(context, oldWidgetId));
-            Feed feed = PreferencesHelper.getFeed(context, oldWidgetId);
-            if (feed != null) {
-                PreferencesHelper.setFeed(context, newWidgetId, feed);
-            }
-            PreferencesHelper
-                    .setGuid(context, newWidgetId, PreferencesHelper.getGuid(context, oldWidgetId));
-            PreferencesHelper.setPosition(context, newWidgetId,
-                    PreferencesHelper.getPosition(context, oldWidgetId));
-            PreferencesHelper.setUpdateInterval(context, newWidgetId,
-                    PreferencesHelper.getUpdateInterval(context, oldWidgetId));
-            PreferencesHelper.setUpdateTime(context, newWidgetId,
-                    PreferencesHelper.getUpdateTime(context, oldWidgetId));
+            Preferences.setUrl(context, newWidgetId, Preferences.getUrl(context, oldWidgetId));
+            Preferences.setGuid(context, newWidgetId, Preferences.getGuid(context, oldWidgetId));
+            Preferences.setPosition(context, newWidgetId,
+                    Preferences.getPosition(context, oldWidgetId));
+            Preferences.setUpdateInterval(context, newWidgetId,
+                    Preferences.getUpdateInterval(context, oldWidgetId));
+            Preferences.setUpdateTime(context, newWidgetId,
+                    Preferences.getUpdateTime(context, oldWidgetId));
             clearPreferences(context, oldWidgetId);
         }
     }
@@ -197,24 +192,29 @@ public class MessageWidgetProvider extends AppWidgetProvider {
     @NonNull
     private static RemoteViews getRemoteViews(@NonNull Context context, int widgetId) {
         RemoteViews remoteViews;
-        String url = PreferencesHelper.getUrl(context, widgetId);
+        String url = Preferences.getUrl(context, widgetId);
         if (TextUtils.isEmpty(url)) {
             remoteViews = getErrorRemoteViews(context);
             remoteViews.setTextViewText(R.id.text, context.getText(R.string.url_is_not_specified));
+            remoteViews.setViewVisibility(R.id.refresh, View.GONE);
         } else if (!UrlHelper.validate(url)) {
             remoteViews = getErrorRemoteViews(context);
             remoteViews.setTextViewText(R.id.text, context.getText(R.string.invalid_url));
+            remoteViews.setViewVisibility(R.id.refresh, View.GONE);
         } else {
-            Feed feed = PreferencesHelper.getFeed(context, widgetId);
+            Feed feed = Repository.getFeed(context, url);
             if (feed == null || feed.getMessages().isEmpty()) {
                 remoteViews = getErrorRemoteViews(context);
                 if (!ConnectivityHelper.isConnectedToNetwork(context)) {
                     remoteViews.setTextViewText(R.id.text, context.getText(R.string.no_connection));
+                    remoteViews.setViewVisibility(R.id.refresh, View.GONE);
                 } else {
                     remoteViews.setTextViewText(R.id.text, context.getText(R.string.no_data));
+                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE);
+                    setRefreshOnClick(context, remoteViews, widgetId);
                 }
             } else {
-                int position = PreferencesHelper.getPosition(context, widgetId);
+                int position = Preferences.getPosition(context, widgetId);
                 if (position < 0) {
                     position = 0;
                 }
@@ -240,9 +240,9 @@ public class MessageWidgetProvider extends AppWidgetProvider {
                     setNextOnClick(context, remoteViews, widgetId);
                 }
                 Message message = messages.get(position);
-                PreferencesHelper.setGuid(context, widgetId, message.getGuid());
-                setTextViewText(remoteViews, R.id.header, message.getTitle());
-                setTextViewText(remoteViews, R.id.text, message.getDescription());
+                Preferences.setGuid(context, widgetId, message.getGuid());
+                TextHelper.setTextViewHtml(remoteViews, R.id.header, message.getTitle());
+                TextHelper.setTextViewHtml(remoteViews, R.id.text, message.getDescription());
                 String link = message.getLink();
                 if (TextUtils.isEmpty(link)) {
                     remoteViews.setViewVisibility(R.id.link, View.GONE);
@@ -334,19 +334,9 @@ public class MessageWidgetProvider extends AppWidgetProvider {
                 AppWidgetManager.INVALID_APPWIDGET_ID);
     }
 
-    @SuppressWarnings("deprecation")
-    private static void setTextViewText(@NonNull RemoteViews remoteViews, @IdRes int viewId,
-            @Nullable String text) {
-        if (TextUtils.isEmpty(text)) {
-            remoteViews.setTextViewText(viewId, EM_DASH);
-        } else {
-            remoteViews.setTextViewText(viewId, Html.fromHtml(text));
-        }
-    }
-
     private static void setUpdateDataAlarm(@NonNull Context context, int widgetId) {
         setUpdateDataAlarm(context, widgetId, SystemClock.elapsedRealtime() + UpdateIntervalHelper
-                .getIntervalMillis(PreferencesHelper.getUpdateInterval(context, widgetId)));
+                .getIntervalMillis(Preferences.getUpdateInterval(context, widgetId)));
     }
 
     private static void setUpdateDataAlarm(@NonNull Context context, int widgetId, long time) {
@@ -357,11 +347,11 @@ public class MessageWidgetProvider extends AppWidgetProvider {
     private void setUpdateDataAlarmRemainingAndUpdateIfNeeded(@NonNull Context context,
             int widgetId) {
         long updateInterval = UpdateIntervalHelper
-                .getIntervalMillis(PreferencesHelper.getUpdateInterval(context, widgetId));
-        long updateTime = PreferencesHelper.getUpdateTime(context, widgetId);
+                .getIntervalMillis(Preferences.getUpdateInterval(context, widgetId));
+        long updateTime = Preferences.getUpdateTime(context, widgetId);
         long elapsedTime = System.currentTimeMillis() - updateTime;
-        if (updateTime == PreferencesHelper.NOT_DEFINED || updateInterval <= elapsedTime) {
-            ReaderHelper.updateFeed(context, widgetId);
+        if (updateTime == Constants.NOT_DEFINED || updateInterval <= elapsedTime) {
+            Provider.updateFeed(context, widgetId);
             setUpdateDataAlarm(context, widgetId);
         } else {
             setUpdateDataAlarm(context, widgetId,
@@ -393,16 +383,15 @@ public class MessageWidgetProvider extends AppWidgetProvider {
     }
 
     private static void clearPreferences(@NonNull Context context, int widgetId) {
-        PreferencesHelper.removeUrl(context, widgetId);
-        PreferencesHelper.removeUpdateInterval(context, widgetId);
-        PreferencesHelper.removeUpdateTime(context, widgetId);
+        Preferences.removeUrl(context, widgetId);
+        Preferences.removeUpdateInterval(context, widgetId);
+        Preferences.removeUpdateTime(context, widgetId);
         clearFeed(context, widgetId);
     }
 
     private static void clearFeed(@NonNull Context context, int widgetId) {
-        PreferencesHelper.removeFeed(context, widgetId);
-        PreferencesHelper.removeGuid(context, widgetId);
-        PreferencesHelper.removePosition(context, widgetId);
+        Preferences.removeGuid(context, widgetId);
+        Preferences.removePosition(context, widgetId);
     }
 
     private static int getRequestCode(int base, int widgetId) {

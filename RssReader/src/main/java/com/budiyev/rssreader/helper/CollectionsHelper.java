@@ -58,15 +58,16 @@ public final class CollectionsHelper {
      * and at the right, if {@code item} is not found among them, another {@code step} of
      * elements on the left and at the right, and so on while {@code item} found or list ended
      *
-     * @param list      List of items
-     * @param item      Item to search for
-     * @param condition Condition searching item to satisfy to
-     * @param position  Search start position
-     * @param step      Search step
+     * @param list          List of items
+     * @param item          Item to search for
+     * @param condition     Condition searching item to satisfy to
+     * @param position      Search start position
+     * @param step          Search step
+     * @param maxIterations Maximum search iterations, {@code -1} for unrestricted
      * @return Position of {@code item} in {@code list} or {@code -1} if {@code item} is not found
      */
     public static <T> int search(@NonNull List<T> list, @Nullable T item,
-            @NonNull Condition<T> condition, int position, int step) {
+            @NonNull SearchCondition<T> condition, int position, int step, int maxIterations) {
         if (position < 0 || step < 1) {
             throw new IllegalArgumentException();
         }
@@ -76,7 +77,7 @@ public final class CollectionsHelper {
             int listSize = list.size();
             int currentOffset = step;
             int previousOffset = 0;
-            for (; ; ) {
+            for (int iteration = 0; ; ) {
                 int start = position - currentOffset;
                 if (start < 0) {
                     start = 0;
@@ -99,14 +100,15 @@ public final class CollectionsHelper {
                 }
                 previousOffset = currentOffset;
                 currentOffset += step;
-                if (start == 0 && end == listSize) {
+                iteration++;
+                if (iteration == maxIterations || start == 0 && end == listSize) {
                     return -1;
                 }
             }
         }
     }
 
-    public interface Condition<T> {
+    public interface SearchCondition<T> {
         boolean test(T item, T candidate);
     }
 }

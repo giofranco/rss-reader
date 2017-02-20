@@ -46,9 +46,9 @@ import android.widget.TextView;
 
 import com.budiyev.rssreader.R;
 import com.budiyev.rssreader.adapter.UpdateIntervalAdapter;
-import com.budiyev.rssreader.helper.PreferencesHelper;
 import com.budiyev.rssreader.helper.UpdateIntervalHelper;
 import com.budiyev.rssreader.helper.UrlHelper;
+import com.budiyev.rssreader.model.preferences.Preferences;
 import com.budiyev.rssreader.widget.MessageWidgetProvider;
 
 import java.util.Objects;
@@ -114,12 +114,12 @@ public class SettingsActivity extends AppCompatActivity {
                     AppWidgetManager.INVALID_APPWIDGET_ID);
         }
         mWidgetId = widgetId;
-        String url = PreferencesHelper.getUrl(this, widgetId);
+        String url = Preferences.getUrl(this, widgetId);
         if (!TextUtils.isEmpty(url)) {
             mRssFeedAddressEditor.setText(url);
         }
         mUpdateIntervalText = (TextView) findViewById(R.id.update_interval_text);
-        setUpdateInterval(PreferencesHelper.getUpdateInterval(this, widgetId));
+        setUpdateInterval(Preferences.getUpdateInterval(this, widgetId));
         mUpdateIntervalDialog = new AlertDialog.Builder(this)
                 .setAdapter(new UpdateIntervalAdapter(this), new DialogInterface.OnClickListener() {
                     @Override
@@ -154,7 +154,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item != null && item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             setResultOk();
             saveSettings();
             finish();
@@ -188,12 +188,12 @@ public class SettingsActivity extends AppCompatActivity {
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             String rssFeedAddress = mRssFeedAddress;
             boolean urlChanged =
-                    !Objects.equals(PreferencesHelper.getUrl(this, widgetId), rssFeedAddress);
+                    !Objects.equals(Preferences.getUrl(this, widgetId), rssFeedAddress);
             int updateInterval = mUpdateInterval;
             boolean intervalChanged =
-                    PreferencesHelper.getUpdateInterval(this, widgetId) != updateInterval;
-            PreferencesHelper.setUrl(this, widgetId, rssFeedAddress);
-            PreferencesHelper.setUpdateInterval(this, widgetId, updateInterval);
+                    Preferences.getUpdateInterval(this, widgetId) != updateInterval;
+            Preferences.setUrl(this, widgetId, rssFeedAddress);
+            Preferences.setUpdateInterval(this, widgetId, updateInterval);
             if (urlChanged || intervalChanged) {
                 Intent intent = MessageWidgetProvider
                         .buildIntent(this, widgetId, MessageWidgetProvider.ACTION_SETTINGS_CHANGED);

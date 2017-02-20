@@ -1,2 +1,2 @@
-# RSS Reader
-RSS feed widget for Android
+# Simply RSS
+Simple RSS feed reader app for Android

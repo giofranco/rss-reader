@@ -21,33 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.budiyev.rssreader.model;
+package com.budiyev.rssreader.model.data;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
-public class Feed implements Iterable<Message> {
+public class FeedInfo {
+    private final String mAddress;
     private final String mTitle;
     private final String mDescription;
     private final String mLink;
     private final String mLanguage;
     private final String mCopyright;
     private final String mPublishDate;
-    private final List<Message> mMessages = new ArrayList<>();
 
-    public Feed(@Nullable String title, @Nullable String description, @Nullable String link,
-            @Nullable String language, @Nullable String copyright, @Nullable String publishDate) {
+    public FeedInfo(@Nullable String address, @Nullable String title, @Nullable String description,
+            @Nullable String link, @Nullable String language, @Nullable String copyright,
+            @Nullable String publishDate) {
+        mAddress = address;
         mTitle = title;
         mDescription = description;
         mLink = link;
         mLanguage = language;
         mCopyright = copyright;
         mPublishDate = publishDate;
+    }
+
+    @Nullable
+    public String getAddress() {
+        return mAddress;
     }
 
     @Nullable
@@ -80,44 +83,25 @@ public class Feed implements Iterable<Message> {
         return mPublishDate;
     }
 
-    @NonNull
-    public List<Message> getMessages() {
-        return mMessages;
-    }
-
-    @Override
-    public Iterator<Message> iterator() {
-        return mMessages.iterator();
-    }
-
     @Override
     public int hashCode() {
-        return Objects
-                .hash(mTitle, mLink, mDescription, mLanguage, mCopyright, mPublishDate, mMessages);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        } else if (obj instanceof Feed) {
-            Feed other = (Feed) obj;
-            return Objects.equals(mTitle, other.mTitle) &&
-                    Objects.equals(mDescription, other.mDescription) &&
-                    Objects.equals(mLink, other.mLink) &&
-                    Objects.equals(mLanguage, other.mLanguage) &&
-                    Objects.equals(mCopyright, other.mCopyright) &&
-                    Objects.equals(mPublishDate, other.mPublishDate) &&
-                    Objects.equals(mMessages, other.mMessages);
+        if (mAddress == null) {
+            return 0;
         } else {
-            return false;
+            return mAddress.hashCode();
         }
     }
 
     @Override
+    public boolean equals(Object obj) {
+        return obj == this ||
+                obj instanceof FeedInfo && Objects.equals(mAddress, ((FeedInfo) obj).mAddress);
+    }
+
+    @Override
     public String toString() {
-        return "Feed [title = " + mTitle + ", description = " + mDescription + ", link = " + mLink +
-                ", language = " + mLanguage + ", copyright = " + mCopyright + ", publish date = " +
-                mPublishDate + ", messages number = " + mMessages.size() + "]";
+        return "Feed [address = " + mAddress + ", title = " + mTitle + ", description = " +
+                mDescription + ", link = " + mLink + ", language = " + mLanguage +
+                ", copyright = " + mCopyright + ", publish date = " + mPublishDate + "]";
     }
 }
