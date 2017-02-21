@@ -13,6 +13,9 @@
     <string name="add_rss_feed">Add RSS feed</string>
     <string name="info_deleted"><![CDATA[Item <b>%s</b> has been deleted]]></string>
     <string name="undo">Undo</string>
+    <string name="no_feed_by_url_header">No RSS feed by URL</string>
+    <string name="no_feed_by_url_text">There are no RSS feed available by the specified URL-address</string>
+    <string name="close">Close</string>
 
     <plurals name="seconds">
         <item quantity="one">%d second</item>

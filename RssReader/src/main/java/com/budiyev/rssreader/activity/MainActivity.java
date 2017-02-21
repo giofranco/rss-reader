@@ -23,6 +23,7 @@
  */
 package com.budiyev.rssreader.activity;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -40,6 +41,7 @@ import android.view.View;
 import com.budiyev.rssreader.R;
 import com.budiyev.rssreader.adapter.FeedsAdapter;
 import com.budiyev.rssreader.dialog.AddUrlDialog;
+import com.budiyev.rssreader.dialog.MessageDialog;
 import com.budiyev.rssreader.helper.ThreadHelper;
 import com.budiyev.rssreader.model.Provider;
 import com.budiyev.rssreader.model.callback.InfoListCallback;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity
     private static final String EXTRA_DIALOG_URL = "dialog_url";
     private static final String EXTRA_FEED_POSITION = "feed_position";
     private AddUrlDialog mAddUrlDialog;
+    private MessageDialog mNoFeedByUrlDialog;
     private LinearLayoutManager mItemsLayoutManager;
     private FeedsAdapter mAdapter;
     private boolean mDialogVisible;
@@ -69,6 +72,8 @@ public class MainActivity extends AppCompatActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         mAddUrlDialog = new AddUrlDialog(this).setCallback(this);
+        mNoFeedByUrlDialog = new MessageDialog(this).setHeader(R.string.no_feed_by_url_header)
+                .setText(R.string.no_feed_by_url_text);
         FloatingActionButton addButton = (FloatingActionButton) findViewById(R.id.add);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,8 +118,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onInfoLoaded(@NonNull String url, @Nullable FeedInfo info) {
+        if (info == null) {
+            ThreadHelper.runOnMainThread(new ShowDialogAction(mNoFeedByUrlDialog));
+            return;
+        }
         FeedsAdapter adapter = mAdapter;
-        if (info == null || adapter == null) {
+        if (adapter == null) {
             return;
         }
         adapter.add(info);
@@ -154,6 +163,20 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
             adapter.refresh(mInfoList, mPosition);
+        }
+    }
+
+    private class ShowDialogAction implements Runnable {
+        private final Dialog mDialog;
+
+        private ShowDialogAction(@NonNull Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        @Override
+        @MainThread
+        public void run() {
+            mDialog.show();
         }
     }
 }

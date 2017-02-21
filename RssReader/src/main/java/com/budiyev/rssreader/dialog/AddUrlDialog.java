@@ -25,14 +25,11 @@ package com.budiyev.rssreader.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatDialog;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -40,9 +37,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.budiyev.rssreader.R;
+import com.budiyev.rssreader.dialog.base.BaseDialog;
 import com.budiyev.rssreader.helper.UrlHelper;
 
-public class AddUrlDialog extends AppCompatDialog {
+public class AddUrlDialog extends BaseDialog {
     private final EditText mUrlEditText;
     private String mUrl;
     private Callback mCallback;
@@ -50,11 +48,11 @@ public class AddUrlDialog extends AppCompatDialog {
     private boolean mUrlCorrect;
 
     public AddUrlDialog(@NonNull Context context) {
-        super(context, getDialogTheme(context));
+        super(context);
         setContentView(R.layout.dialog_add_url);
         setCancelable(true);
-        mUrlEditText = findValidViewById(R.id.url);
-        final TextView addButton = findValidViewById(R.id.add);
+        mUrlEditText = (EditText) findViewById(R.id.url);
+        final TextView addButton = (TextView) findViewById(R.id.add);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,7 +60,7 @@ public class AddUrlDialog extends AppCompatDialog {
                 dismiss();
             }
         });
-        TextView cancelButton = findValidViewById(R.id.cancel);
+        TextView cancelButton = (TextView) findViewById(R.id.cancel);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,24 +155,6 @@ public class AddUrlDialog extends AppCompatDialog {
         mUrl = url;
         mUrlEditText.setText(url);
         super.show();
-    }
-
-    @NonNull
-    @SuppressWarnings("unchecked")
-    private <T extends View> T findValidViewById(@IdRes int viewId) {
-        View view = findViewById(viewId);
-        if (view == null) {
-            throw new IllegalStateException("Invalid layout.");
-        }
-        return (T) view;
-    }
-
-    private static int getDialogTheme(@NonNull Context context) {
-        TypedValue typedValue = new TypedValue();
-        context.getTheme()
-                .resolveAttribute(android.support.v7.appcompat.R.attr.alertDialogTheme, typedValue,
-                        true);
-        return typedValue.resourceId;
     }
 
     public interface Callback {

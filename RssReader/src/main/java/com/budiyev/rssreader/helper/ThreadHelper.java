@@ -25,6 +25,7 @@ package com.budiyev.rssreader.helper;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.AnyThread;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.CancellationException;
@@ -40,7 +41,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class ThreadHelper {
-    private static final Lock FIXED_THREAD_POOL_LOCK = new ReentrantLock();
+    private static final Lock WORKER_THREAD_EXECUTOR_LOCK = new ReentrantLock();
     private static final Lock MAIN_THREAD_HANDLER_LOCK = new ReentrantLock();
     private static volatile ExecutorService sWorkerThreadExecutor;
     private static volatile Handler sMainThreadHandler;
@@ -48,10 +49,12 @@ public final class ThreadHelper {
     private ThreadHelper() {
     }
 
+    @AnyThread
     public static void runOnWorkerThread(@NonNull Runnable action) {
         getWorkerThreadExecutor().submit(action);
     }
 
+    @AnyThread
     public static void runOnMainThread(@NonNull Runnable action) {
         getMainThreadHandler().post(action);
     }
@@ -60,7 +63,7 @@ public final class ThreadHelper {
     private static ExecutorService getWorkerThreadExecutor() {
         ExecutorService executor = sWorkerThreadExecutor;
         if (executor == null) {
-            FIXED_THREAD_POOL_LOCK.lock();
+            WORKER_THREAD_EXECUTOR_LOCK.lock();
             try {
                 executor = sWorkerThreadExecutor;
                 if (executor == null) {
@@ -80,7 +83,7 @@ public final class ThreadHelper {
                     sWorkerThreadExecutor = executor;
                 }
             } finally {
-                FIXED_THREAD_POOL_LOCK.unlock();
+                WORKER_THREAD_EXECUTOR_LOCK.unlock();
             }
         }
         return executor;
@@ -117,7 +120,7 @@ public final class ThreadHelper {
 
     private static final class AppThreadFactory implements ThreadFactory {
         private static final AtomicInteger COUNTER = new AtomicInteger();
-        private static final String NAME_PREFIX = "RSS Reader worker thread #";
+        private static final String NAME_PREFIX = "Simply RSS worker thread #";
 
         @Override
         public Thread newThread(@NonNull Runnable runnable) {
