@@ -23,11 +23,11 @@
  */
 package com.budiyev.rssreader.activity;
 
-import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -42,6 +42,7 @@ import com.budiyev.rssreader.R;
 import com.budiyev.rssreader.adapter.FeedsAdapter;
 import com.budiyev.rssreader.dialog.AddUrlDialog;
 import com.budiyev.rssreader.dialog.MessageDialog;
+import com.budiyev.rssreader.helper.ConnectivityHelper;
 import com.budiyev.rssreader.helper.ThreadHelper;
 import com.budiyev.rssreader.model.Provider;
 import com.budiyev.rssreader.model.callback.InfoListCallback;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity
     private static final String EXTRA_DIALOG_URL = "dialog_url";
     private static final String EXTRA_FEED_POSITION = "feed_position";
     private AddUrlDialog mAddUrlDialog;
-    private MessageDialog mNoFeedByUrlDialog;
+    private MessageDialog mMessageDialog;
     private LinearLayoutManager mItemsLayoutManager;
     private FeedsAdapter mAdapter;
     private boolean mDialogVisible;
@@ -72,14 +73,18 @@ public class MainActivity extends AppCompatActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         mAddUrlDialog = new AddUrlDialog(this).setCallback(this);
-        mNoFeedByUrlDialog = new MessageDialog(this).setHeader(R.string.no_feed_by_url_header)
-                .setText(R.string.no_feed_by_url_text);
+        mMessageDialog = new MessageDialog(this);
         FloatingActionButton addButton = (FloatingActionButton) findViewById(R.id.add);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDialogVisible = true;
-                mAddUrlDialog.show();
+                if (ConnectivityHelper.isConnectedToNetwork(MainActivity.this)) {
+                    mDialogVisible = true;
+                    mAddUrlDialog.show();
+                } else {
+                    mMessageDialog.show(R.string.no_network_to_get_feed_header,
+                            R.string.no_network_to_get_feed_text);
+                }
             }
         });
         RecyclerView itemsView = (RecyclerView) findViewById(R.id.list);
@@ -119,7 +124,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onInfoLoaded(@NonNull String url, @Nullable FeedInfo info) {
         if (info == null) {
-            ThreadHelper.runOnMainThread(new ShowDialogAction(mNoFeedByUrlDialog));
+            ThreadHelper.runOnMainThread(new ShowMessageAction(R.string.no_feed_by_url_header,
+                    R.string.no_feed_by_url_text));
             return;
         }
         FeedsAdapter adapter = mAdapter;
@@ -166,17 +172,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ShowDialogAction implements Runnable {
-        private final Dialog mDialog;
+    private class ShowMessageAction implements Runnable {
+        private final int mHeaderId;
+        private final int mTitleId;
 
-        private ShowDialogAction(@NonNull Dialog dialog) {
-            mDialog = dialog;
+        private ShowMessageAction(@StringRes int headerId, @StringRes int titleId) {
+            mHeaderId = headerId;
+            mTitleId = titleId;
         }
 
         @Override
         @MainThread
         public void run() {
-            mDialog.show();
+            MessageDialog messageDialog = mMessageDialog;
+            if (messageDialog == null) {
+                return;
+            }
+            messageDialog.show(mHeaderId, mTitleId);
         }
     }
 }

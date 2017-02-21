@@ -16,6 +16,8 @@
     <string name="no_feed_by_url_header">No RSS feed by URL</string>
     <string name="no_feed_by_url_text">There are no RSS feed available by the specified URL-address</string>
     <string name="close">Close</string>
+    <string name="no_network_to_get_feed_header">No network connection</string>
+    <string name="no_network_to_get_feed_text">Network connection is required to add new RSS feed</string>
 
     <plurals name="seconds">
         <item quantity="one">%d second</item>

@@ -23,6 +23,9 @@
  */
 package com.budiyev.rssreader.helper;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -35,6 +38,13 @@ import android.widget.TextView;
 
 public final class TextHelper {
     public static final String EM_DASH = "\u2014";
+
+    private static final Html.ImageGetter IMAGE_GETTER = new Html.ImageGetter() {
+        @Override
+        public Drawable getDrawable(String source) {
+            return new ColorDrawable(Color.TRANSPARENT);
+        }
+    };
 
     private TextHelper() {
     }
@@ -68,10 +78,10 @@ public final class TextHelper {
     @NonNull
     public static Spanned parseHtml(@NonNull String htmlString) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return Html.fromHtml(htmlString, Html.FROM_HTML_MODE_LEGACY);
+            return Html.fromHtml(htmlString, Html.FROM_HTML_MODE_LEGACY, IMAGE_GETTER, null);
         } else {
             //noinspection deprecation
-            return Html.fromHtml(htmlString);
+            return Html.fromHtml(htmlString, IMAGE_GETTER, null);
         }
     }
 }
