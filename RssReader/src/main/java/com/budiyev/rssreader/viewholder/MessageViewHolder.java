@@ -76,8 +76,8 @@ public class MessageViewHolder extends ViewHolder<Message> {
     @Override
     public void bind(@NonNull Message message) {
         mMessage = message;
-        TextHelper.setTextViewHtml(mHeader, message.getTitle());
-        TextHelper.setTextViewHtml(mText, message.getDescription());
+        TextHelper.setTextViewText(mHeader, message.getTitleSpanned());
+        TextHelper.setTextViewText(mText, message.getDescriptionSpanned());
         if (TextUtils.isEmpty(message.getLink())) {
             mLink.setVisibility(View.GONE);
         } else {

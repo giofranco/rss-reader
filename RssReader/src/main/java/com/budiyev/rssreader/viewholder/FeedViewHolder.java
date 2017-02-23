@@ -90,8 +90,8 @@ public class FeedViewHolder extends ViewHolder<FeedInfo> {
     @Override
     public void bind(@NonNull FeedInfo feedInfo) {
         mFeedInfo = feedInfo;
-        TextHelper.setTextViewHtml(mHeader, feedInfo.getTitle());
-        TextHelper.setTextViewHtml(mText, feedInfo.getDescription());
+        TextHelper.setTextViewText(mHeader, feedInfo.getTitleSpanned());
+        TextHelper.setTextViewText(mText, feedInfo.getDescriptionSpanned());
         if (TextUtils.isEmpty(feedInfo.getLink())) {
             mLink.setVisibility(View.GONE);
         } else {

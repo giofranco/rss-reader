@@ -241,8 +241,8 @@ public class MessageWidgetProvider extends AppWidgetProvider {
                 }
                 Message message = messages.get(position);
                 Preferences.setGuid(context, widgetId, message.getGuid());
-                TextHelper.setTextViewHtml(remoteViews, R.id.header, message.getTitle());
-                TextHelper.setTextViewHtml(remoteViews, R.id.text, message.getDescription());
+                TextHelper.setTextViewText(remoteViews, R.id.header, message.getTitleSpanned());
+                TextHelper.setTextViewText(remoteViews, R.id.text, message.getDescriptionSpanned());
                 String link = message.getLink();
                 if (TextUtils.isEmpty(link)) {
                     remoteViews.setViewVisibility(R.id.link, View.GONE);

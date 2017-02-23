@@ -24,6 +24,9 @@
 package com.budiyev.rssreader.model.data;
 
 import android.support.annotation.Nullable;
+import android.text.Spanned;
+
+import com.budiyev.rssreader.helper.TextHelper;
 
 import java.util.Objects;
 
@@ -33,6 +36,8 @@ public class Message {
     private final String mLink;
     private final String mAuthor;
     private final String mGuid;
+    private final Spanned mTitleSpanned;
+    private final Spanned mDescriptionSpanned;
 
     public Message(@Nullable String title, @Nullable String description, @Nullable String link,
             @Nullable String author, @Nullable String guid) {
@@ -41,6 +46,16 @@ public class Message {
         mLink = link;
         mAuthor = author;
         mGuid = guid;
+        if (title == null) {
+            mTitleSpanned = null;
+        } else {
+            mTitleSpanned = TextHelper.parseHtml(title);
+        }
+        if (description == null) {
+            mDescriptionSpanned = null;
+        } else {
+            mDescriptionSpanned = TextHelper.parseHtml(description);
+        }
     }
 
     @Nullable
@@ -66,6 +81,16 @@ public class Message {
     @Nullable
     public String getGuid() {
         return mGuid;
+    }
+
+    @Nullable
+    public Spanned getTitleSpanned() {
+        return mTitleSpanned;
+    }
+
+    @Nullable
+    public Spanned getDescriptionSpanned() {
+        return mDescriptionSpanned;
     }
 
     @Override

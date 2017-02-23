@@ -49,20 +49,20 @@ public final class TextHelper {
     private TextHelper() {
     }
 
-    public static void setTextViewHtml(@NonNull TextView textView, @Nullable String htmlString) {
-        if (TextUtils.isEmpty(htmlString)) {
+    public static void setTextViewText(@NonNull TextView textView, @Nullable CharSequence text) {
+        if (TextUtils.isEmpty(text)) {
             textView.setText(EM_DASH);
         } else {
-            textView.setText(parseHtml(htmlString));
+            textView.setText(text);
         }
     }
 
-    public static void setTextViewHtml(@NonNull RemoteViews remoteViews, @IdRes int viewId,
-            @Nullable String htmlString) {
-        if (TextUtils.isEmpty(htmlString)) {
+    public static void setTextViewText(@NonNull RemoteViews remoteViews, @IdRes int viewId,
+            @Nullable CharSequence text) {
+        if (TextUtils.isEmpty(text)) {
             remoteViews.setTextViewText(viewId, EM_DASH);
         } else {
-            remoteViews.setTextViewText(viewId, parseHtml(htmlString));
+            remoteViews.setTextViewText(viewId, text);
         }
     }
 

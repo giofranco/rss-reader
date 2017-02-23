@@ -24,6 +24,9 @@
 package com.budiyev.rssreader.model.data;
 
 import android.support.annotation.Nullable;
+import android.text.Spanned;
+
+import com.budiyev.rssreader.helper.TextHelper;
 
 import java.util.Objects;
 
@@ -35,6 +38,8 @@ public class FeedInfo {
     private final String mLanguage;
     private final String mCopyright;
     private final String mPublishDate;
+    private final Spanned mTitleSpanned;
+    private final Spanned mDescriptionSpanned;
 
     public FeedInfo(@Nullable String address, @Nullable String title, @Nullable String description,
             @Nullable String link, @Nullable String language, @Nullable String copyright,
@@ -46,6 +51,16 @@ public class FeedInfo {
         mLanguage = language;
         mCopyright = copyright;
         mPublishDate = publishDate;
+        if (title == null) {
+            mTitleSpanned = null;
+        } else {
+            mTitleSpanned = TextHelper.parseHtml(title);
+        }
+        if (description == null) {
+            mDescriptionSpanned = null;
+        } else {
+            mDescriptionSpanned = TextHelper.parseHtml(description);
+        }
     }
 
     @Nullable
@@ -81,6 +96,16 @@ public class FeedInfo {
     @Nullable
     public String getPublishDate() {
         return mPublishDate;
+    }
+
+    @Nullable
+    public Spanned getTitleSpanned() {
+        return mTitleSpanned;
+    }
+
+    @Nullable
+    public Spanned getDescriptionSpanned() {
+        return mDescriptionSpanned;
     }
 
     @Override
